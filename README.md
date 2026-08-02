@@ -1,66 +1,71 @@
-# Fifth Zero OS — static site (index.html / style.css / script.js)
+# Fifth & Zero OS
 
-Same live app as before (Supabase-backed Inbox, Projects, Clients, Finance,
-Journal, gated behind login) — rebuilt as a plain static site instead of a
-Next.js project. No build step, no `npm install` needed to run it.
+A calm, premium personal operating system — Tasks, Clients, Projects,
+Finance, Health, Habits, Calendar, and Knowledge (notes) — in one
+dashboard. Built per `PROJECT_SPEC.md` as a static site: pure HTML, CSS,
+and vanilla JavaScript, no build step, no frameworks, no npm install.
 
-## Folder contents
-```
-index.html      the whole app shell + auth screen
-style.css       all styling
-script.js       all logic (auth + Supabase CRUD)
-config.js       <- put your Supabase URL + anon key here
-images/         favicon.svg, logo.svg
-fonts/          see fonts/README.txt (works via Google Fonts CDN by default)
-supabase/       schema.sql — run this in Supabase once
-```
+## Run it
 
-## 1. Set up Supabase (~3 min)
-1. [supabase.com](https://supabase.com) → New project.
-2. SQL Editor → New query → paste all of `supabase/schema.sql` → Run.
-   This creates the 5 tables and locks every row to its owner (RLS), so the
-   public anon key can never see or touch another user's data.
-3. Project Settings → API → copy the **Project URL** and **anon public** key.
-4. (Optional, convenience) Authentication → Providers → Email → turn off
-   "Confirm email" so you can sign up and use it immediately.
+Just open `index.html` in a browser, or serve the folder:
 
-## 2. Fill in config.js
-Open `config.js` and paste in the two values from step 1:
-```js
-const SUPABASE_URL = 'https://your-project-ref.supabase.co';
-const SUPABASE_ANON_KEY = 'your-anon-public-key';
-```
-
-## 3. Try it locally
-Just open `index.html` directly in a browser, or serve the folder:
 ```bash
 npx serve .
 ```
 
-## 4. Deploy for real
-Because this is a static site (no build step), any of these work:
+Everything is stored in `localStorage`, so the app works fully offline
+and keeps your data on your machine.
 
-**Vercel** (drag-and-drop, no CLI needed):
-- Go to vercel.com/new → drag this whole folder onto the page → Deploy.
-- Since there's no framework to detect, Vercel just serves the files as-is.
+## Folder structure
 
-**Netlify:**
-- netlify.com/drop → drag the folder → get a live URL instantly.
+```
+index.html      app shell: sidebar + page host
+styles.css      the whole design system (dark mode, cards, forms, modal)
+script.js       bootstrap + hash router
 
-**GitHub Pages:**
-- Push the folder to a GitHub repo → Settings → Pages → deploy from the
-  main branch root.
+/data           localStorage abstraction (data/storage.js) — the only
+                place that touches window.localStorage
+/utils          shared helpers: id generation, date/currency formatting,
+                DOM-building, a tiny markdown renderer
+/components     reusable UI: sidebar, modal, toast, forms, list rows,
+                dashboard/panel cards
+/modules        one file per feature: dashboard, tasks, finance, clients,
+                projects, health, habits, knowledge, calendar
 
-No environment variables needed at deploy time — the Supabase keys are
-already sitting in `config.js`, and that's fine: the anon key is meant to be
-public, Row Level Security is what actually protects your data.
+images/         favicon.svg, logo.svg
+config.js       Supabase URL/anon key placeholder — for future use
+supabase/       schema.sql — for future use
+```
 
-## What's real vs. not yet
-- **Real**: Inbox, Projects, Clients, Finance, Journal — full add/edit/delete,
-  persisted in Supabase, private to your logged-in account.
-- **Not yet wired**: Today, Calendar, AI Console, Health, Memory, Ideas,
-  Knowledge, Settings, Fifth Zero, Job Dashboard — same pattern (a table +
-  a render function) extends to these whenever you want them built out.
-- **No AI auto-classification** on Inbox yet — capture works, but nothing
-  automatically files it for you. That layer needs a backend function
-  calling an LLM on top of this.
+Scripts are loaded as plain `<script>` tags (not ES modules) in
+dependency order, each attaching itself to a shared `FZ` namespace
+(`FZ.storage`, `FZ.dom`, `FZ.modules.tasks`, …). This keeps the app
+runnable by opening `index.html` directly — no server, no bundler,
+no CORS issues with modules over `file://`.
+
+## Data model
+
+Every collection lives under its own `localStorage` key (see
+`data/storage.js`), isolated from the others:
+
+- `tasks`, `clients`, `projects`, `health`, `habits`, `notes`,
+  `calendar` — arrays of records
+- `finance` — `{ transactions, subscriptions, loans, invoices }`
+- `settings` — `{ theme, name }`
+
+## What's built (Version 1)
+
+All eight modules are functional: add/edit/delete records, a home
+dashboard with six live summary cards (Tasks Today, Cash Available,
+Pending Payments, Steps, Calories, Calendar Events), quick-add actions
+for Task/Expense/Client/Note, a finance overview chart (plain
+`<canvas>`, no charting library), a month calendar that merges
+standalone events with task due dates, and markdown notes with search.
+
+## Future integrations
+
+Supabase (`config.js` / `supabase/schema.sql` are placeholders for
+this), Apple Health, Google Calendar, Gmail, Drive, and an AI
+assistant — none of these are wired up yet. The local-first data layer
+is designed so a Supabase sync layer can be added later without
+touching module code.

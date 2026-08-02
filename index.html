@@ -3,47 +3,55 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Fifth Zero OS</title>
+<meta name="theme-color" content="#0b0b0f" />
+<title>Fifth &amp; Zero OS</title>
 <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
-<link rel="stylesheet" href="style.css" />
+<link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-<!-- ============ AUTH SCREEN ============ -->
-<div class="auth-wrap" id="authWrap">
-  <div class="auth-card">
-    <div class="auth-title serif">Fifth Zero OS</div>
-    <div class="auth-sub" id="authSub">Sign in to your operating system</div>
-    <form id="authForm">
-      <div class="field"><label>Email</label><input type="email" id="authEmail" required /></div>
-      <div class="field"><label>Password</label><input type="password" id="authPassword" required minlength="6" /></div>
-      <div class="error-text" id="authError"></div>
-      <button class="btn btn-primary" id="authSubmit" style="width:100%;justify-content:center;margin-top:6px;">Sign in</button>
-    </form>
-    <button class="auth-toggle" id="authToggle">Don't have an account? Sign up</button>
-  </div>
-</div>
-
 <!-- ============ APP SHELL ============ -->
-<div class="app-shell" id="appShell">
+<div class="app-shell">
   <aside class="sidebar">
     <div class="brand">
       <img src="images/favicon.svg" alt="" />
-      <span class="brand-text">Fifth Zero</span>
+      <span class="brand-text">Fifth &amp; Zero</span>
     </div>
     <nav class="nav-list" id="navList"></nav>
-    <div class="userbox">
-      <div class="avatar" id="userAvatar">N</div>
-      <div class="userbox-email" id="userEmail"></div>
-      <button class="signout" id="signOutBtn">Sign out</button>
-    </div>
   </aside>
-  <main class="main"><div class="page" id="pageRoot"></div></main>
+  <main class="main">
+    <div class="page" id="pageRoot"></div>
+  </main>
 </div>
 
-<!-- Supabase JS client (UMD build via CDN) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<!-- ============ SCRIPTS ============
+     Plain scripts (no bundler, no ES modules) so the app runs by simply
+     opening index.html — every file attaches to the shared FZ namespace.
+     Load order matters: data/utils first, components next, modules after,
+     script.js (bootstrap + router) last. -->
+<script src="data/storage.js"></script>
+<script src="utils/id.js"></script>
+<script src="utils/format.js"></script>
+<script src="utils/dom.js"></script>
+<script src="utils/markdown.js"></script>
+
+<script src="components/toast.js"></script>
+<script src="components/modal.js"></script>
+<script src="components/form.js"></script>
+<script src="components/card.js"></script>
+<script src="components/listRow.js"></script>
+<script src="components/sidebar.js"></script>
+
+<script src="modules/tasks.js"></script>
+<script src="modules/finance.js"></script>
+<script src="modules/clients.js"></script>
+<script src="modules/projects.js"></script>
+<script src="modules/health.js"></script>
+<script src="modules/habits.js"></script>
+<script src="modules/knowledge.js"></script>
+<script src="modules/calendar.js"></script>
+<script src="modules/dashboard.js"></script>
+
 <script src="script.js"></script>
 </body>
 </html>
