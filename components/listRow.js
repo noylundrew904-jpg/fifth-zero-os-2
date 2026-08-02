@@ -18,6 +18,7 @@
         type: 'checkbox',
         class: 'row-check',
         checked: !!opts.checked,
+        'aria-label': 'Mark "' + opts.title + '" as ' + (opts.checked ? 'not done' : 'done'),
         onchange: opts.onToggle,
       }));
     }
@@ -28,8 +29,8 @@
 
     const right = [];
     if (opts.tag) right.push(el('span', { class: 'tag tag-' + (opts.tagClass || 'default') }, opts.tag));
-    if (opts.onEdit) right.push(el('button', { class: 'icon-btn', type: 'button', title: 'Edit', onclick: opts.onEdit }, '✎'));
-    if (opts.onDelete) right.push(el('button', { class: 'icon-btn icon-btn-danger', type: 'button', title: 'Delete', onclick: opts.onDelete }, '✕'));
+    if (opts.onEdit) right.push(el('button', { class: 'icon-btn', type: 'button', title: 'Edit', 'aria-label': 'Edit ' + opts.title, onclick: opts.onEdit }, '✎'));
+    if (opts.onDelete) right.push(el('button', { class: 'icon-btn icon-btn-danger', type: 'button', title: 'Delete', 'aria-label': 'Delete ' + opts.title, onclick: opts.onDelete }, '✕'));
 
     return el('div', { class: 'list-row', 'data-id': opts.id }, [
       el('div', { class: 'row-left' }, left),

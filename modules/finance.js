@@ -163,49 +163,25 @@
   }
 
   // ---- Chart: last 6 months net (income - expense) ---------------------------
+  // Monthly net totals are also used by the Analytics module — exposed as
+  // monthlyNetTotals() below rather than recomputed there.
 
-  function drawMonthlyChart(canvas, transactions) {
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width = canvas.clientWidth * 2;
-    const height = canvas.height = canvas.clientHeight * 2;
-    ctx.clearRect(0, 0, width, height);
-
+  function monthlyNetTotals(transactions, monthCount) {
     const months = [];
     const now = new Date();
-    for (let i = 5; i >= 0; i--) {
+    for (let i = (monthCount || 6) - 1; i >= 0; i--) {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       months.push({ key: d.toISOString().slice(0, 7), label: d.toLocaleDateString('en-US', { month: 'short' }) });
     }
+    const totals = months.map((m) => transactions
+      .filter((t) => (t.date || '').startsWith(m.key))
+      .reduce((sum, t) => sum + (t.type === 'income' ? Number(t.amount) : -Number(t.amount)), 0));
+    return { labels: months.map((m) => m.label), totals };
+  }
 
-    const totals = months.map((m) => {
-      return transactions
-        .filter((t) => (t.date || '').startsWith(m.key))
-        .reduce((sum, t) => sum + (t.type === 'income' ? Number(t.amount) : -Number(t.amount)), 0);
-    });
-
-    const maxAbs = Math.max(1, ...totals.map((v) => Math.abs(v)));
-    const barWidth = width / months.length;
-    const zeroY = height / 2;
-
-    totals.forEach((value, i) => {
-      const barHeight = (Math.abs(value) / maxAbs) * (height / 2 - 24);
-      const x = i * barWidth + barWidth * 0.25;
-      const w = barWidth * 0.5;
-      ctx.fillStyle = value >= 0 ? '#4ade80' : '#f87171';
-      if (value >= 0) ctx.fillRect(x, zeroY - barHeight, w, barHeight);
-      else ctx.fillRect(x, zeroY, w, barHeight);
-
-      ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      ctx.font = '20px -apple-system, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(months[i].label, x + w / 2, height - 6);
-    });
-
-    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
-    ctx.beginPath();
-    ctx.moveTo(0, zeroY);
-    ctx.lineTo(width, zeroY);
-    ctx.stroke();
+  function drawMonthlyChart(canvas, transactions) {
+    const { labels, totals } = monthlyNetTotals(transactions, 6);
+    FZ.chart.drawBarChart(canvas, { labels, values: totals });
   }
 
   // ---- Render -----------------------------------------------------------------
@@ -267,15 +243,17 @@
       children: txList,
     }));
 
-    // Subscriptions (not part of the soft-delete list — instant delete, still confirmed)
+    // Subscriptions
+    const activeSubscriptions = FZ.archive.active(d.subscriptions);
     const subList = el('div', { class: 'list' },
-      d.subscriptions.length ? d.subscriptions.map((s) => FZ.listRow.build({
+      activeSubscriptions.length ? activeSubscriptions.map((s) => FZ.listRow.build({
         id: s.id,
         title: s.name + ' — ' + fmt.currency(s.amount) + ' / ' + s.cycle,
         meta: 'Next charge ' + fmt.friendlyDate(s.nextDate),
-        onDelete: () => FZ.deleteFlow.runHard({
+        onDelete: () => FZ.deleteFlow.run({
           label: 'Subscription',
-          onDelete: () => { const nd = data(); nd.subscriptions = nd.subscriptions.filter((x) => x.id !== s.id); save(nd); },
+          onDelete: () => { const nd = data(); nd.subscriptions = FZ.archive.softDeleteById(nd.subscriptions, s.id); save(nd); },
+          onUndo: () => { const nd = data(); nd.subscriptions = FZ.archive.restoreById(nd.subscriptions, s.id); save(nd); },
           onDone: rerender,
         }),
       })) : [emptyState({
@@ -293,14 +271,16 @@
     }));
 
     // Loans
+    const activeLoans = FZ.archive.active(d.loans);
     const loanList = el('div', { class: 'list' },
-      d.loans.length ? d.loans.map((l) => FZ.listRow.build({
+      activeLoans.length ? activeLoans.map((l) => FZ.listRow.build({
         id: l.id,
         title: l.name + ' — ' + fmt.currency(l.remaining) + ' remaining',
         meta: (l.rate ? l.rate + '% · ' : '') + (l.dueDate ? 'Next due ' + fmt.friendlyDate(l.dueDate) : ''),
-        onDelete: () => FZ.deleteFlow.runHard({
+        onDelete: () => FZ.deleteFlow.run({
           label: 'Loan',
-          onDelete: () => { const nd = data(); nd.loans = nd.loans.filter((x) => x.id !== l.id); save(nd); },
+          onDelete: () => { const nd = data(); nd.loans = FZ.archive.softDeleteById(nd.loans, l.id); save(nd); },
+          onUndo: () => { const nd = data(); nd.loans = FZ.archive.restoreById(nd.loans, l.id); save(nd); },
           onDone: rerender,
         }),
       })) : [emptyState({
@@ -353,6 +333,6 @@
   FZ.modules = FZ.modules || {};
   FZ.modules.finance = {
     render, openTransactionForm, openSubscriptionForm, openLoanForm, openInvoiceForm,
-    cashAvailable, pendingPaymentsTotal, revenueByClient, markInvoicePaid,
+    cashAvailable, pendingPaymentsTotal, revenueByClient, markInvoicePaid, monthlyNetTotals,
   };
 })(window.FZ = window.FZ || {});

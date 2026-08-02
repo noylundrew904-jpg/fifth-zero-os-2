@@ -1,0 +1,14 @@
+{
+  "name": "Fifth & Zero OS",
+  "short_name": "Fifth & Zero",
+  "description": "A calm, premium personal operating system for tasks, clients, projects, finance, health, habits, calendar, and notes.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0b0b0f",
+  "theme_color": "#0b0b0f",
+  "icons": [
+    { "src": "images/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "images/logo.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

@@ -17,7 +17,9 @@
     { path: 'health', icon: '♥', label: 'Health' },
     { path: 'habits', icon: '↻', label: 'Habits' },
     { path: 'knowledge', icon: '✎', label: 'Knowledge' },
+    { path: 'analytics', icon: '▲', label: 'Analytics' },
     { path: 'archive', icon: '🗑', label: 'Archive' },
+    { path: 'settings', icon: '⚙', label: 'Settings' },
   ];
 
   function render(container, currentPath) {

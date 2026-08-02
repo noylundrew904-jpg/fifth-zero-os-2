@@ -1,6 +1,7 @@
 /* ==========================================================================
    FZ.modules.calendar — month grid combining standalone events (fz.calendar)
    with task due dates, so deadlines show up without duplicating data.
+   Events follow the same soft-delete/archive pattern as every other record.
    ========================================================================== */
 
 (function (FZ) {
@@ -48,9 +49,10 @@
             id: e.id,
             title: e.title,
             meta: (e.time ? e.time + ' · ' : '') + (e.source === 'task' ? 'Task deadline' : 'Event'),
-            onDelete: e.source === 'task' ? null : () => FZ.deleteFlow.runHard({
+            onDelete: e.source === 'task' ? null : () => FZ.deleteFlow.run({
               label: 'Event',
-              onDelete: () => FZ.storage.remove('calendar', e.id),
+              onDelete: () => FZ.storage.softDelete('calendar', e.id),
+              onUndo: () => FZ.storage.restore('calendar', e.id),
               onDone: () => { onChanged(); openDayView(isoDate, onChanged); },
             }),
           })))
@@ -66,30 +68,32 @@
 
     const monthLabel = new Date(viewYear, viewMonth, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
     const nav = el('div', { class: 'calendar-nav' }, [
-      el('button', { class: 'btn btn-ghost', type: 'button', onclick: () => { viewMonth -= 1; if (viewMonth < 0) { viewMonth = 11; viewYear -= 1; } rerender(); } }, '‹'),
+      el('button', { class: 'btn btn-ghost', type: 'button', 'aria-label': 'Previous month', onclick: () => { viewMonth -= 1; if (viewMonth < 0) { viewMonth = 11; viewYear -= 1; } rerender(); } }, '‹'),
       el('div', { class: 'calendar-month-label' }, monthLabel),
-      el('button', { class: 'btn btn-ghost', type: 'button', onclick: () => { viewMonth += 1; if (viewMonth > 11) { viewMonth = 0; viewYear += 1; } rerender(); } }, '›'),
+      el('button', { class: 'btn btn-ghost', type: 'button', 'aria-label': 'Next month', onclick: () => { viewMonth += 1; if (viewMonth > 11) { viewMonth = 0; viewYear += 1; } rerender(); } }, '›'),
     ]);
 
     const firstOfMonth = new Date(viewYear, viewMonth, 1);
     const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
     const startWeekday = firstOfMonth.getDay();
 
-    const grid = el('div', { class: 'calendar-grid' });
-    ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach((d) => grid.appendChild(el('div', { class: 'calendar-dow' }, d)));
-    for (let i = 0; i < startWeekday; i++) grid.appendChild(el('div', { class: 'calendar-cell calendar-cell-empty' }));
+    const grid = el('div', { class: 'calendar-grid', role: 'grid', 'aria-label': monthLabel });
+    ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach((d) => grid.appendChild(el('div', { class: 'calendar-dow', 'aria-hidden': 'true' }, d)));
+    for (let i = 0; i < startWeekday; i++) grid.appendChild(el('div', { class: 'calendar-cell calendar-cell-empty', 'aria-hidden': 'true' }));
 
     for (let day = 1; day <= daysInMonth; day++) {
       const isoDate = fmt.toISODate(new Date(viewYear, viewMonth, day));
       const count = eventsOn(isoDate).length;
+      const label = fmt.friendlyDate(isoDate) + (count ? `, ${count} event${count === 1 ? '' : 's'}` : ', no events');
       grid.appendChild(
         el('button', {
           class: 'calendar-cell' + (fmt.isToday(isoDate) ? ' calendar-cell-today' : ''),
           type: 'button',
+          'aria-label': label,
           onclick: () => openDayView(isoDate, rerender),
         }, [
-          el('div', { class: 'calendar-day-num' }, String(day)),
-          count ? el('div', { class: 'calendar-dot' }) : null,
+          el('div', { class: 'calendar-day-num', 'aria-hidden': 'true' }, String(day)),
+          count ? el('div', { class: 'calendar-dot', 'aria-hidden': 'true' }) : null,
         ])
       );
     }

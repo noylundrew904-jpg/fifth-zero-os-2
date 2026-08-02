@@ -22,17 +22,21 @@
     health: (root) => FZ.modules.health.render(root),
     habits: (root) => FZ.modules.habits.render(root),
     knowledge: (root) => FZ.modules.knowledge.render(root),
+    analytics: (root) => FZ.modules.analytics.render(root),
     archive: (root) => FZ.modules.archive.render(root),
+    settings: (root) => FZ.modules.settings.render(root),
   };
 
   // Soft-deleted records past their 30-day window are purged once per
   // load — cheap, and keeps localStorage from growing forever.
-  const SOFT_DELETE_KEYS = ['tasks', 'clients', 'projects', 'notes', 'habits', 'health'];
+  const SOFT_DELETE_KEYS = ['tasks', 'clients', 'projects', 'notes', 'habits', 'health', 'calendar'];
+  const SOFT_DELETE_FINANCE_FIELDS = ['transactions', 'invoices', 'subscriptions', 'loans'];
   function purgeExpiredArchive() {
     SOFT_DELETE_KEYS.forEach((key) => FZ.storage.purgeExpired(key));
     const financeData = FZ.storage.get('finance');
-    financeData.transactions = FZ.archive.purgeExpired(financeData.transactions);
-    financeData.invoices = FZ.archive.purgeExpired(financeData.invoices);
+    SOFT_DELETE_FINANCE_FIELDS.forEach((field) => {
+      financeData[field] = FZ.archive.purgeExpired(financeData[field]);
+    });
     FZ.storage.set('finance', financeData);
   }
 
@@ -74,6 +78,15 @@
     FZ.sidebar.mountSearch(searchHost, navigate);
     renderRoute();
   });
+
+  // Registering the service worker is what makes the app installable and
+  // fully offline — safe to skip silently where unsupported (e.g. very old
+  // browsers), the app already works offline via localStorage regardless.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+  }
 
   // Keep "today"-based figures (dashboard greeting/clock, due-today counts)
   // fresh without requiring a manual reload.

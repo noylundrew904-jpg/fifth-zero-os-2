@@ -31,7 +31,9 @@
   // is the "every N" multiplier. See utils/recurrence.js for the engine.
 
   function toggleDone(task) {
-    FZ.storage.update('tasks', task.id, { done: !task.done });
+    // completedAt (cleared on un-check) is what Analytics buckets task
+    // completions by week from — real data, not derived from `done` alone.
+    FZ.storage.update('tasks', task.id, { done: !task.done, completedAt: task.done ? null : new Date().toISOString() });
     if (!task.done && task.recurUnit && task.recurUnit !== 'none') {
       FZ.storage.add('tasks', {
         id: FZ.id(),

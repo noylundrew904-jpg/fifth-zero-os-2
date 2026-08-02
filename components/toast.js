@@ -13,7 +13,7 @@
   function host() {
     let node = document.getElementById('fzToast');
     if (!node) {
-      node = el('div', { id: 'fzToast', class: 'toast' });
+      node = el('div', { id: 'fzToast', class: 'toast', role: 'status', 'aria-live': 'polite' });
       document.body.appendChild(node);
     }
     return node;
