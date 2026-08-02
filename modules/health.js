@@ -11,11 +11,11 @@
   const fmt = FZ.format;
 
   function all() {
-    return FZ.storage.get('health').sort((a, b) => b.date.localeCompare(a.date));
+    return FZ.storage.list('health').sort((a, b) => b.date.localeCompare(a.date));
   }
 
   function todayEntry() {
-    return FZ.storage.get('health').find((e) => e.date === fmt.todayISO());
+    return all().find((e) => e.date === fmt.todayISO());
   }
 
   function todaySteps() {
@@ -28,8 +28,9 @@
     return entry ? Number(entry.calories) || 0 : 0;
   }
 
-  function openForm(onSaved) {
-    const existing = todayEntry();
+  // existing (optional) pre-fills the form so history rows are editable,
+  // not just deletable.
+  function openForm(existing, onSaved) {
     const fields = [
       { name: 'date', label: 'Date', type: 'date', value: (existing && existing.date) || fmt.todayISO(), required: true },
       { name: 'steps', label: 'Steps', type: 'number', value: existing && existing.steps },
@@ -42,7 +43,10 @@
 
     const { form } = FZ.form.build(fields, 'Save entry', (values) => {
       const list = FZ.storage.get('health');
-      const index = list.findIndex((e) => e.date === values.date);
+      // Upsert by date: an entry already logged for that date gets updated
+      // instead of duplicated, whether the user is editing today's entry
+      // or fixing an older one.
+      const index = list.findIndex((e) => e.date === values.date && !e.deletedAt);
       if (index === -1) {
         list.push(Object.assign({ id: FZ.id() }, values));
       } else {
@@ -54,7 +58,7 @@
       if (onSaved) onSaved();
     });
 
-    FZ.modal.open({ title: 'Log health', body: form });
+    FZ.modal.open({ title: existing ? 'Edit entry' : 'Log health', body: form });
   }
 
   function render(container) {
@@ -73,20 +77,33 @@
 
     container.appendChild(section({
       title: 'Today',
-      actions: el('button', { class: 'btn btn-primary', type: 'button', onclick: () => openForm(rerender) }, '+ Log entry'),
+      actions: el('button', { class: 'btn btn-primary', type: 'button', onclick: () => openForm(today, rerender) }, '+ Log entry'),
       children: stats,
     }));
 
     const list = el('div', { class: 'list' },
       entries.length ? entries.map((entry) => FZ.listRow.build({
+        id: entry.id,
         title: fmt.friendlyDate(entry.date),
         meta: [
           entry.steps ? entry.steps + ' steps' : '',
           entry.calories ? entry.calories + ' cal' : '',
           entry.workout || '',
         ].filter(Boolean).join(' · '),
-        onDelete: () => { FZ.storage.set('health', FZ.storage.get('health').filter((e) => e.id !== entry.id)); rerender(); },
-      })) : [emptyState('No health entries yet.')]
+        onEdit: () => openForm(entry, rerender),
+        onDelete: () => FZ.deleteFlow.run({
+          label: 'Health entry',
+          onDelete: () => FZ.storage.softDelete('health', entry.id),
+          onUndo: () => FZ.storage.restore('health', entry.id),
+          onDone: rerender,
+        }),
+      })) : [emptyState({
+        icon: '♥',
+        title: 'No health entries yet',
+        message: 'Log steps, calories, weight, sleep, workouts, and water — manually for now, Apple Health sync is planned.',
+        actionLabel: '+ Log entry',
+        onAction: () => openForm(null, rerender),
+      })]
     );
 
     container.appendChild(section({ title: 'History', children: list }));

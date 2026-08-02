@@ -8,7 +8,9 @@
   'use strict';
   const { el } = FZ.dom;
 
-  // opts: { title, meta, tag, checked, onToggle, onEdit, onDelete }
+  // opts: { id, title, meta, tag, checked, onToggle, onEdit, onDelete }
+  // id (optional) is stamped as data-id so global search can scroll a
+  // result into view and flash it after navigating to its module.
   function build(opts) {
     const left = [];
     if (opts.onToggle) {
@@ -29,7 +31,7 @@
     if (opts.onEdit) right.push(el('button', { class: 'icon-btn', type: 'button', title: 'Edit', onclick: opts.onEdit }, '✎'));
     if (opts.onDelete) right.push(el('button', { class: 'icon-btn icon-btn-danger', type: 'button', title: 'Delete', onclick: opts.onDelete }, '✕'));
 
-    return el('div', { class: 'list-row' }, [
+    return el('div', { class: 'list-row', 'data-id': opts.id }, [
       el('div', { class: 'row-left' }, left),
       el('div', { class: 'row-right' }, right),
     ]);

@@ -14,7 +14,7 @@
   // ---- Queries used by other modules / the dashboard ----------------------
 
   function all() {
-    return FZ.storage.get('tasks');
+    return FZ.storage.list('tasks');
   }
 
   function dueToday() {
@@ -26,29 +26,22 @@
     return all().filter((t) => !t.done).length;
   }
 
-  // ---- Recurring task handling ---------------------------------------------
-
-  // When a recurring task is completed, spawn the next occurrence.
-  function nextOccurrenceDate(dueDate, recurring) {
-    if (!dueDate) return fmt.todayISO();
-    const d = new Date(dueDate + 'T00:00:00');
-    if (recurring === 'daily') d.setDate(d.getDate() + 1);
-    else if (recurring === 'weekly') d.setDate(d.getDate() + 7);
-    else if (recurring === 'monthly') d.setMonth(d.getMonth() + 1);
-    return fmt.toISODate(d);
-  }
+  // ---- Recurring task handling -----------------------------------------------
+  // A task recurs when recurUnit is set (day/week/month/year); recurInterval
+  // is the "every N" multiplier. See utils/recurrence.js for the engine.
 
   function toggleDone(task) {
     FZ.storage.update('tasks', task.id, { done: !task.done });
-    if (!task.done && task.recurring && task.recurring !== 'none') {
+    if (!task.done && task.recurUnit && task.recurUnit !== 'none') {
       FZ.storage.add('tasks', {
         id: FZ.id(),
         title: task.title,
         notes: task.notes,
         priority: task.priority,
-        dueDate: nextOccurrenceDate(task.dueDate, task.recurring),
+        dueDate: FZ.recurrence.next(task.dueDate, task.recurUnit, task.recurInterval),
         done: false,
-        recurring: task.recurring,
+        recurUnit: task.recurUnit,
+        recurInterval: task.recurInterval,
         projectId: task.projectId || '',
         createdAt: new Date().toISOString(),
       });
@@ -58,19 +51,15 @@
   // ---- Add / edit form ------------------------------------------------------
 
   function openForm(existing, onSaved) {
-    const projects = FZ.storage.get('projects');
+    const projects = FZ.storage.list('projects');
     const fields = [
       { name: 'title', label: 'Title', required: true, value: existing && existing.title },
       { name: 'priority', label: 'Priority', type: 'select', value: (existing && existing.priority) || 'medium',
         options: PRIORITIES.map((p) => ({ value: p, label: p[0].toUpperCase() + p.slice(1) })) },
       { name: 'dueDate', label: 'Due date', type: 'date', value: existing && existing.dueDate },
-      { name: 'recurring', label: 'Repeats', type: 'select', value: (existing && existing.recurring) || 'none',
-        options: [
-          { value: 'none', label: 'Does not repeat' },
-          { value: 'daily', label: 'Daily' },
-          { value: 'weekly', label: 'Weekly' },
-          { value: 'monthly', label: 'Monthly' },
-        ] },
+      { name: 'recurUnit', label: 'Repeats', type: 'select', value: (existing && existing.recurUnit) || 'none',
+        options: [{ value: 'none', label: 'Does not repeat' }].concat(FZ.recurrence.UNITS) },
+      { name: 'recurInterval', label: 'Every (N)', type: 'number', value: (existing && existing.recurInterval) || 1, step: '1' },
       { name: 'projectId', label: 'Project', type: 'select', value: existing && existing.projectId,
         options: [{ value: '', label: 'None' }].concat(projects.map((p) => ({ value: p.id, label: p.name }))) },
       { name: 'notes', label: 'Notes', type: 'textarea', value: existing && existing.notes },
@@ -109,18 +98,30 @@
 
     const list = el('div', { class: 'list' },
       tasks.length ? tasks.map((task) => FZ.listRow.build({
+        id: task.id,
         title: task.title,
         meta: [
           task.dueDate ? fmt.dueLabel(task.dueDate) : 'No due date',
-          task.recurring && task.recurring !== 'none' ? '· repeats ' + task.recurring : '',
+          FZ.recurrence.label(task.recurUnit, task.recurInterval) ? '· ' + FZ.recurrence.label(task.recurUnit, task.recurInterval) : '',
         ].join(' '),
         tag: task.priority,
         tagClass: task.priority,
         checked: task.done,
         onToggle: () => { toggleDone(task); rerender(); },
         onEdit: () => openForm(task, rerender),
-        onDelete: () => { FZ.storage.remove('tasks', task.id); rerender(); },
-      })) : [emptyState('No tasks yet. Add your first one.')]
+        onDelete: () => FZ.deleteFlow.run({
+          label: 'Task',
+          onDelete: () => FZ.storage.softDelete('tasks', task.id),
+          onUndo: () => FZ.storage.restore('tasks', task.id),
+          onDone: rerender,
+        }),
+      })) : [emptyState({
+        icon: '✓',
+        title: 'No tasks yet',
+        message: 'Track to-dos with priorities, due dates, and repeats — done items and deadlines roll up to your dashboard.',
+        actionLabel: '+ Add a task',
+        onAction: () => openForm(null, rerender),
+      })]
     );
 
     container.appendChild(

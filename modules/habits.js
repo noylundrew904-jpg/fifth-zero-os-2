@@ -10,7 +10,7 @@
   const fmt = FZ.format;
 
   function all() {
-    return FZ.storage.get('habits');
+    return FZ.storage.list('habits');
   }
 
   // Consecutive days completed, counting back from today (or yesterday if
@@ -68,13 +68,25 @@
     const habits = all();
     const list = el('div', { class: 'list' },
       habits.length ? habits.map((habit) => FZ.listRow.build({
+        id: habit.id,
         title: habit.name,
         meta: streak(habit) + ' day streak · ' + habit.frequency,
         checked: isDoneToday(habit),
         onToggle: () => { toggleToday(habit); rerender(); },
         onEdit: () => openForm(habit, rerender),
-        onDelete: () => { FZ.storage.remove('habits', habit.id); rerender(); },
-      })) : [emptyState('No habits yet. Add your first one.')]
+        onDelete: () => FZ.deleteFlow.run({
+          label: 'Habit',
+          onDelete: () => FZ.storage.softDelete('habits', habit.id),
+          onUndo: () => FZ.storage.restore('habits', habit.id),
+          onDone: rerender,
+        }),
+      })) : [emptyState({
+        icon: '↻',
+        title: 'No habits yet',
+        message: 'Add something you want to do daily or weekly and check it off to build a streak.',
+        actionLabel: '+ Add a habit',
+        onAction: () => openForm(null, rerender),
+      })]
     );
 
     container.appendChild(

@@ -13,8 +13,8 @@
   let viewMonth = new Date().getMonth(); // 0-indexed
 
   function eventsOn(isoDate) {
-    const manual = FZ.storage.get('calendar').filter((e) => e.date === isoDate);
-    const taskDeadlines = FZ.storage.get('tasks')
+    const manual = FZ.storage.list('calendar').filter((e) => e.date === isoDate);
+    const taskDeadlines = FZ.storage.list('tasks')
       .filter((t) => t.dueDate === isoDate && !t.done)
       .map((t) => ({ id: t.id, title: t.title, date: t.dueDate, source: 'task' }));
     return manual.concat(taskDeadlines);
@@ -45,11 +45,16 @@
     const body = el('div', { class: 'detail-view' }, [
       events.length
         ? el('div', { class: 'list' }, events.map((e) => FZ.listRow.build({
+            id: e.id,
             title: e.title,
             meta: (e.time ? e.time + ' · ' : '') + (e.source === 'task' ? 'Task deadline' : 'Event'),
-            onDelete: e.source === 'task' ? null : () => { FZ.storage.remove('calendar', e.id); onChanged(); openDayView(isoDate, onChanged); },
+            onDelete: e.source === 'task' ? null : () => FZ.deleteFlow.runHard({
+              label: 'Event',
+              onDelete: () => FZ.storage.remove('calendar', e.id),
+              onDone: () => { onChanged(); openDayView(isoDate, onChanged); },
+            }),
           })))
-        : el('div', { class: 'empty-state' }, 'Nothing scheduled.'),
+        : FZ.card.emptyState({ icon: '▦', title: 'Nothing scheduled', message: 'Add an event for this day.' }),
       el('button', { class: 'btn btn-primary', type: 'button', onclick: () => openEventForm(isoDate, () => { onChanged(); FZ.modal.close(); }) }, '+ Add event'),
     ]);
     FZ.modal.open({ title: fmt.friendlyDate(isoDate), body });

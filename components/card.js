@@ -30,8 +30,17 @@
     ]);
   }
 
-  function emptyState(message) {
-    return el('div', { class: 'empty-state' }, message);
+  // Every empty module explains what it's for and how to add the first
+  // item — never just a blank panel. actionLabel/onAction are optional.
+  function emptyState({ icon, title, message, actionLabel, onAction }) {
+    return el('div', { class: 'empty-state' }, [
+      icon ? el('div', { class: 'empty-icon' }, icon) : null,
+      el('div', { class: 'empty-title' }, title),
+      el('div', { class: 'empty-message' }, message),
+      actionLabel && onAction
+        ? el('button', { class: 'btn btn-primary empty-action', type: 'button', onclick: onAction }, actionLabel)
+        : null,
+    ]);
   }
 
   FZ.card = { summaryCard, section, emptyState };

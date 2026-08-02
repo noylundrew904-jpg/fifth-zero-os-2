@@ -1,6 +1,7 @@
 /* ==========================================================================
    FZ.modules.projects — timeline (start/end), budget, linked tasks, and a
-   profit figure derived from finance transactions tagged to the project.
+   profit figure derived from active (non-archived) finance transactions
+   tagged to the project.
    ========================================================================== */
 
 (function (FZ) {
@@ -12,16 +13,16 @@
   const STATUSES = ['active', 'on-hold', 'completed'];
 
   function all() {
-    return FZ.storage.get('projects');
+    return FZ.storage.list('projects');
   }
 
   function profit(projectId) {
-    const transactions = FZ.storage.get('finance').transactions.filter((t) => t.projectId === projectId);
+    const transactions = FZ.archive.active(FZ.storage.get('finance').transactions).filter((t) => t.projectId === projectId);
     return transactions.reduce((sum, t) => sum + (t.type === 'income' ? Number(t.amount) : -Number(t.amount)), 0);
   }
 
   function openForm(existing, onSaved) {
-    const clients = FZ.storage.get('clients');
+    const clients = FZ.storage.list('clients');
     const fields = [
       { name: 'name', label: 'Project name', required: true, value: existing && existing.name },
       { name: 'clientId', label: 'Client', type: 'select', value: existing && existing.clientId,
@@ -50,8 +51,8 @@
   }
 
   function openDetail(project) {
-    const client = FZ.storage.get('clients').find((c) => c.id === project.clientId);
-    const tasks = FZ.storage.get('tasks').filter((t) => t.projectId === project.id);
+    const client = FZ.storage.list('clients').find((c) => c.id === project.clientId);
+    const tasks = FZ.storage.list('tasks').filter((t) => t.projectId === project.id);
     const spent = profit(project.id);
     const budget = Number(project.budget) || 0;
 
@@ -65,8 +66,8 @@
       project.notes ? el('div', { class: 'detail-notes' }, project.notes) : null,
       el('h3', { class: 'detail-subhead' }, 'Tasks'),
       tasks.length
-        ? el('div', { class: 'list' }, tasks.map((t) => FZ.listRow.build({ title: t.title, meta: t.dueDate ? fmt.dueLabel(t.dueDate) : '', checked: t.done })))
-        : emptyState('No tasks linked to this project.'),
+        ? el('div', { class: 'list' }, tasks.map((t) => FZ.listRow.build({ id: t.id, title: t.title, meta: t.dueDate ? fmt.dueLabel(t.dueDate) : '', checked: t.done })))
+        : emptyState({ icon: '✓', title: 'No tasks yet', message: 'Tasks linked to this project will show up here.' }),
     ]);
 
     FZ.modal.open({ title: project.name, body });
@@ -80,18 +81,30 @@
     const list = el('div', { class: 'list' },
       projects.length ? projects.map((project) => {
         const row = FZ.listRow.build({
+          id: project.id,
           title: project.name,
           meta: fmt.currency(Number(project.budget) || 0) + ' budget · profit ' + fmt.currency(profit(project.id)),
           tag: project.status,
           tagClass: project.status === 'active' ? 'success' : project.status === 'completed' ? 'default' : 'warning',
           onEdit: () => openForm(project, rerender),
-          onDelete: () => { FZ.storage.remove('projects', project.id); rerender(); },
+          onDelete: () => FZ.deleteFlow.run({
+            label: 'Project',
+            onDelete: () => FZ.storage.softDelete('projects', project.id),
+            onUndo: () => FZ.storage.restore('projects', project.id),
+            onDone: rerender,
+          }),
         });
         const titleEl = row.querySelector('.row-title');
         titleEl.classList.add('row-title-link');
         titleEl.addEventListener('click', () => openDetail(project));
         return row;
-      }) : [emptyState('No projects yet. Add your first one.')]
+      }) : [emptyState({
+        icon: '◆',
+        title: 'No projects yet',
+        message: 'Track timeline, budget, and profit for each piece of work.',
+        actionLabel: '+ Add a project',
+        onAction: () => openForm(null, rerender),
+      })]
     );
 
     container.appendChild(

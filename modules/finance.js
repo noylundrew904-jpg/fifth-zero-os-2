@@ -2,6 +2,10 @@
    FZ.modules.finance — income, expenses, subscriptions, loans, invoices,
    and a small canvas chart of the last 6 months. Also exposes the cash
    and pending-payments figures the dashboard cards show.
+
+   Invoices are the one source of truth for money: marking an invoice paid
+   auto-creates its income transaction (see markInvoicePaid) instead of
+   asking the user to log the income separately, per product decision.
    ========================================================================== */
 
 (function (FZ) {
@@ -21,22 +25,58 @@
   }
 
   function cashAvailable() {
-    const { transactions } = data();
+    const transactions = FZ.archive.active(data().transactions);
     return transactions.reduce((sum, t) => sum + (t.type === 'income' ? Number(t.amount) : -Number(t.amount)), 0);
   }
 
   function pendingPaymentsTotal() {
-    const { invoices } = data();
+    const invoices = FZ.archive.active(data().invoices);
     return invoices
       .filter((inv) => inv.status !== 'paid')
       .reduce((sum, inv) => sum + Number(inv.amount), 0);
   }
 
+  // Total paid-invoice + logged income for one client — shown on the
+  // client detail view.
+  function revenueByClient(clientId) {
+    return FZ.archive.active(data().transactions)
+      .filter((t) => t.type === 'income' && t.clientId === clientId)
+      .reduce((sum, t) => sum + Number(t.amount), 0);
+  }
+
+  // ---- Invoice -> transaction (single source of truth for money) ------------
+
+  function markInvoicePaid(invoiceId, onDone) {
+    const d = data();
+    const invoice = d.invoices.find((inv) => inv.id === invoiceId);
+    if (!invoice || invoice.status === 'paid') return;
+
+    invoice.status = 'paid';
+    const transaction = {
+      id: FZ.id(),
+      type: 'income',
+      amount: invoice.amount,
+      category: 'Invoice payment',
+      date: fmt.todayISO(),
+      clientId: invoice.clientId || '',
+      projectId: invoice.projectId || '',
+      note: 'Auto-generated from invoice payment',
+      invoiceId: invoice.id,
+      createdAt: new Date().toISOString(),
+    };
+    d.transactions.push(transaction);
+    invoice.transactionId = transaction.id;
+
+    save(d);
+    FZ.toast.show('Invoice paid — income transaction added automatically');
+    if (onDone) onDone();
+  }
+
   // ---- Transactions -----------------------------------------------------------
 
   function openTransactionForm(type, onSaved) {
-    const clients = FZ.storage.get('clients');
-    const projects = FZ.storage.get('projects');
+    const clients = FZ.storage.list('clients');
+    const projects = FZ.storage.list('projects');
     const fields = [
       { name: 'type', label: 'Type', type: 'select', value: type || 'expense',
         options: [{ value: 'income', label: 'Income' }, { value: 'expense', label: 'Expense' }] },
@@ -99,8 +139,8 @@
   }
 
   function openInvoiceForm(onSaved) {
-    const clients = FZ.storage.get('clients');
-    const projects = FZ.storage.get('projects');
+    const clients = FZ.storage.list('clients');
+    const projects = FZ.storage.list('projects');
     const fields = [
       { name: 'clientId', label: 'Client', type: 'select',
         options: [{ value: '', label: 'None' }].concat(clients.map((c) => ({ value: c.id, label: c.name }))) },
@@ -108,13 +148,14 @@
         options: [{ value: '', label: 'None' }].concat(projects.map((p) => ({ value: p.id, label: p.name }))) },
       { name: 'amount', label: 'Amount', type: 'number', step: '0.01', required: true },
       { name: 'status', label: 'Status', type: 'select', value: 'pending',
-        options: [{ value: 'pending', label: 'Pending' }, { value: 'paid', label: 'Paid' }, { value: 'overdue', label: 'Overdue' }] },
+        options: [{ value: 'pending', label: 'Pending' }, { value: 'overdue', label: 'Overdue' }] },
       { name: 'dueDate', label: 'Due date', type: 'date', value: fmt.todayISO() },
     ];
     const { form } = FZ.form.build(fields, 'Add invoice', (values) => {
       const d = data();
       d.invoices.push(Object.assign({ id: FZ.id(), issuedDate: fmt.todayISO() }, values));
       save(d);
+      FZ.toast.show('Invoice added');
       FZ.modal.close();
       if (onSaved) onSaved();
     });
@@ -173,6 +214,8 @@
     const rerender = () => render(container);
     container.innerHTML = '';
     const d = data();
+    const activeTransactions = FZ.archive.active(d.transactions);
+    const activeInvoices = FZ.archive.active(d.invoices);
 
     // Overview + chart
     const chartCanvas = el('canvas', { class: 'chart-canvas' });
@@ -187,21 +230,33 @@
       ]),
     });
     container.appendChild(overview);
-    requestAnimationFrame(() => drawMonthlyChart(chartCanvas, d.transactions));
+    requestAnimationFrame(() => drawMonthlyChart(chartCanvas, activeTransactions));
 
     // Transactions
     const txList = el('div', { class: 'list' },
-      d.transactions.length ? d.transactions
+      activeTransactions.length ? activeTransactions
         .slice()
         .sort((a, b) => (b.date || '').localeCompare(a.date || ''))
         .slice(0, 25)
         .map((t) => FZ.listRow.build({
+          id: t.id,
           title: (t.category || (t.type === 'income' ? 'Income' : 'Expense')) + ' — ' + fmt.currency(t.amount),
-          meta: fmt.friendlyDate(t.date),
+          meta: fmt.friendlyDate(t.date) + (t.invoiceId ? ' · from invoice' : ''),
           tag: t.type,
           tagClass: t.type === 'income' ? 'success' : 'danger',
-          onDelete: () => { const nd = data(); nd.transactions = nd.transactions.filter((x) => x.id !== t.id); save(nd); rerender(); },
-        })) : [emptyState('No transactions yet.')]
+          onDelete: () => FZ.deleteFlow.run({
+            label: 'Transaction',
+            onDelete: () => { const nd = data(); nd.transactions = FZ.archive.softDeleteById(nd.transactions, t.id); save(nd); },
+            onUndo: () => { const nd = data(); nd.transactions = FZ.archive.restoreById(nd.transactions, t.id); save(nd); },
+            onDone: rerender,
+          }),
+        })) : [emptyState({
+          icon: '$',
+          title: 'No transactions yet',
+          message: 'Log income and expenses to see cash available and the 6-month trend.',
+          actionLabel: '+ Add expense',
+          onAction: () => openTransactionForm('expense', rerender),
+        })]
     );
     container.appendChild(section({
       title: 'Transactions',
@@ -212,13 +267,24 @@
       children: txList,
     }));
 
-    // Subscriptions
+    // Subscriptions (not part of the soft-delete list — instant delete, still confirmed)
     const subList = el('div', { class: 'list' },
       d.subscriptions.length ? d.subscriptions.map((s) => FZ.listRow.build({
+        id: s.id,
         title: s.name + ' — ' + fmt.currency(s.amount) + ' / ' + s.cycle,
         meta: 'Next charge ' + fmt.friendlyDate(s.nextDate),
-        onDelete: () => { const nd = data(); nd.subscriptions = nd.subscriptions.filter((x) => x.id !== s.id); save(nd); rerender(); },
-      })) : [emptyState('No subscriptions tracked.')]
+        onDelete: () => FZ.deleteFlow.runHard({
+          label: 'Subscription',
+          onDelete: () => { const nd = data(); nd.subscriptions = nd.subscriptions.filter((x) => x.id !== s.id); save(nd); },
+          onDone: rerender,
+        }),
+      })) : [emptyState({
+        icon: '↻',
+        title: 'No subscriptions tracked',
+        message: 'Track recurring charges like software or hosting so they don’t catch you off guard.',
+        actionLabel: '+ Add subscription',
+        onAction: () => openSubscriptionForm(rerender),
+      })]
     );
     container.appendChild(section({
       title: 'Subscriptions',
@@ -229,10 +295,21 @@
     // Loans
     const loanList = el('div', { class: 'list' },
       d.loans.length ? d.loans.map((l) => FZ.listRow.build({
+        id: l.id,
         title: l.name + ' — ' + fmt.currency(l.remaining) + ' remaining',
         meta: (l.rate ? l.rate + '% · ' : '') + (l.dueDate ? 'Next due ' + fmt.friendlyDate(l.dueDate) : ''),
-        onDelete: () => { const nd = data(); nd.loans = nd.loans.filter((x) => x.id !== l.id); save(nd); rerender(); },
-      })) : [emptyState('No loans tracked.')]
+        onDelete: () => FZ.deleteFlow.runHard({
+          label: 'Loan',
+          onDelete: () => { const nd = data(); nd.loans = nd.loans.filter((x) => x.id !== l.id); save(nd); },
+          onDone: rerender,
+        }),
+      })) : [emptyState({
+        icon: '$',
+        title: 'No loans tracked',
+        message: 'Track balances and due dates for anything you’re paying down.',
+        actionLabel: '+ Add loan',
+        onAction: () => openLoanForm(rerender),
+      })]
     );
     container.appendChild(section({
       title: 'Loans',
@@ -242,23 +319,29 @@
 
     // Invoices
     const invoiceList = el('div', { class: 'list' },
-      d.invoices.length ? d.invoices.map((inv) => {
-        const client = FZ.storage.get('clients').find((c) => c.id === inv.clientId);
+      activeInvoices.length ? activeInvoices.map((inv) => {
+        const client = FZ.storage.list('clients').find((c) => c.id === inv.clientId);
         return FZ.listRow.build({
+          id: inv.id,
           title: (client ? client.name : 'Unassigned') + ' — ' + fmt.currency(inv.amount),
           meta: 'Due ' + fmt.friendlyDate(inv.dueDate),
           tag: inv.status,
           tagClass: inv.status === 'paid' ? 'success' : inv.status === 'overdue' ? 'danger' : 'default',
-          onToggle: inv.status === 'paid' ? null : () => {
-            const nd = data();
-            const target = nd.invoices.find((x) => x.id === inv.id);
-            target.status = 'paid';
-            save(nd);
-            rerender();
-          },
-          onDelete: () => { const nd = data(); nd.invoices = nd.invoices.filter((x) => x.id !== inv.id); save(nd); rerender(); },
+          onToggle: inv.status === 'paid' ? null : () => markInvoicePaid(inv.id, rerender),
+          onDelete: () => FZ.deleteFlow.run({
+            label: 'Invoice',
+            onDelete: () => { const nd = data(); nd.invoices = FZ.archive.softDeleteById(nd.invoices, inv.id); save(nd); },
+            onUndo: () => { const nd = data(); nd.invoices = FZ.archive.restoreById(nd.invoices, inv.id); save(nd); },
+            onDone: rerender,
+          }),
         });
-      }) : [emptyState('No invoices yet.')]
+      }) : [emptyState({
+        icon: '⏳',
+        title: 'No invoices yet',
+        message: 'Bill a client, then check it off — paid invoices automatically add the income transaction for you.',
+        actionLabel: '+ Add invoice',
+        onAction: () => openInvoiceForm(rerender),
+      })]
     );
     container.appendChild(section({
       title: 'Invoices',
@@ -270,6 +353,6 @@
   FZ.modules = FZ.modules || {};
   FZ.modules.finance = {
     render, openTransactionForm, openSubscriptionForm, openLoanForm, openInvoiceForm,
-    cashAvailable, pendingPaymentsTotal,
+    cashAvailable, pendingPaymentsTotal, revenueByClient, markInvoicePaid,
   };
 })(window.FZ = window.FZ || {});

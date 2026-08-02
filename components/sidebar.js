@@ -1,6 +1,6 @@
 /* ==========================================================================
-   FZ.sidebar — left navigation. Renders once, re-highlights the active
-   route whenever the router changes.
+   FZ.sidebar — left navigation plus the global search box. Renders once;
+   the nav portion re-highlights the active route whenever it changes.
    ========================================================================== */
 
 (function (FZ) {
@@ -17,6 +17,7 @@
     { path: 'health', icon: '♥', label: 'Health' },
     { path: 'habits', icon: '↻', label: 'Habits' },
     { path: 'knowledge', icon: '✎', label: 'Knowledge' },
+    { path: 'archive', icon: '🗑', label: 'Archive' },
   ];
 
   function render(container, currentPath) {
@@ -35,5 +36,11 @@
     });
   }
 
-  FZ.sidebar = { render, ROUTES };
+  // Mounts the search box once (separate from render(), which re-runs on
+  // every route change — the search input shouldn't be rebuilt each time).
+  function mountSearch(container, navigate) {
+    FZ.search.mount(container, navigate);
+  }
+
+  FZ.sidebar = { render, mountSearch, ROUTES };
 })(window.FZ = window.FZ || {});

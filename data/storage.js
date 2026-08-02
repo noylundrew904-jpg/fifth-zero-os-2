@@ -75,7 +75,8 @@
     return list[index];
   }
 
-  // Convenience for array collections: remove a record by id and save.
+  // Hard remove — bypasses the archive. Only used by the Archive screen's
+  // "Delete permanently" action and by the 30-day auto-purge.
   function remove(key, id) {
     const list = get(key);
     const next = list.filter((item) => item.id !== id);
@@ -83,9 +84,39 @@
     return next.length !== list.length;
   }
 
+  // ---- Soft delete (see PROJECT_SPEC's approved delete behavior) -----------
+  // Nothing a user deletes disappears immediately: it's stamped with
+  // deletedAt and kept for 30 days so it can be restored from the Archive.
+
+  // Active (non-deleted) records — what every module lists/renders.
+  function list(key) {
+    return FZ.archive.active(get(key));
+  }
+
+  // Deleted-but-recoverable records — what the Archive screen shows.
+  function trashed(key) {
+    return FZ.archive.trashed(get(key));
+  }
+
+  function softDelete(key, id) {
+    set(key, FZ.archive.softDeleteById(get(key), id));
+  }
+
+  function restore(key, id) {
+    set(key, FZ.archive.restoreById(get(key), id));
+  }
+
+  // Drop anything past its 30-day retention window. Safe to call on boot.
+  function purgeExpired(key) {
+    set(key, FZ.archive.purgeExpired(get(key)));
+  }
+
   function clone(value) {
     return JSON.parse(JSON.stringify(value));
   }
 
-  FZ.storage = { KEYS, get, set, add, update, remove };
+  FZ.storage = {
+    KEYS, get, set, add, update, remove,
+    list, trashed, softDelete, restore, purgeExpired,
+  };
 })(window.FZ = window.FZ || {});

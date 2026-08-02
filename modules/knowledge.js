@@ -10,7 +10,7 @@
   const fmt = FZ.format;
 
   function all() {
-    return FZ.storage.get('notes').sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+    return FZ.storage.list('notes').sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
   }
 
   function openForm(existing, onSaved) {
@@ -59,15 +59,26 @@
       });
       listHost.innerHTML = '';
       if (!notes.length) {
-        listHost.appendChild(emptyState(query ? 'No notes match your search.' : 'No notes yet. Add your first one.'));
+        listHost.appendChild(emptyState(query ? {
+          icon: '✎', title: 'No matches', message: 'No notes match your search.',
+        } : {
+          icon: '✎', title: 'No notes yet', message: 'Capture markdown notes and find them again with search.',
+          actionLabel: '+ Add a note', onAction: () => openForm(null, rerender),
+        }));
         return;
       }
       notes.forEach((note) => {
         const row = FZ.listRow.build({
+          id: note.id,
           title: note.title,
           meta: fmt.friendlyDate((note.updatedAt || note.createdAt || '').slice(0, 10)),
           onEdit: () => openForm(note, rerender),
-          onDelete: () => { FZ.storage.remove('notes', note.id); rerender(); },
+          onDelete: () => FZ.deleteFlow.run({
+            label: 'Note',
+            onDelete: () => FZ.storage.softDelete('notes', note.id),
+            onUndo: () => FZ.storage.restore('notes', note.id),
+            onDone: rerender,
+          }),
         });
         row.querySelector('.row-title').classList.add('row-title-link');
         row.querySelector('.row-title').addEventListener('click', () => openView(note, rerender));
