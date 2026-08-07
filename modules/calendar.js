@@ -57,7 +57,7 @@
             }),
           })))
         : FZ.card.emptyState({ icon: '▦', title: 'Nothing scheduled', message: 'Add an event for this day.' }),
-      el('button', { class: 'btn btn-primary', type: 'button', onclick: () => openEventForm(isoDate, () => { onChanged(); FZ.modal.close(); }) }, '+ Add event'),
+      el('button', { class: 'btn btn-primary', type: 'button', onclick: () => openEventForm(isoDate, () => { onChanged(); openDayView(isoDate, onChanged); }) }, '+ Add event'),
     ]);
     FZ.modal.open({ title: fmt.friendlyDate(isoDate), body });
   }

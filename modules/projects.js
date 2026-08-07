@@ -51,13 +51,13 @@
   }
 
   function openDetail(project) {
-    const client = FZ.storage.list('clients').find((c) => c.id === project.clientId);
+    const client = FZ.storage.get('clients').find((c) => c.id === project.clientId);
     const tasks = FZ.storage.list('tasks').filter((t) => t.projectId === project.id);
     const spent = profit(project.id);
     const budget = Number(project.budget) || 0;
 
     const body = el('div', { class: 'detail-view' }, [
-      client ? el('div', { class: 'detail-line' }, 'Client: ' + client.name) : null,
+      client ? el('div', { class: 'detail-line' }, 'Client: ' + client.name + (client.deletedAt ? ' (archived)' : '')) : null,
       el('div', { class: 'detail-line' }, 'Timeline: ' + (project.startDate ? fmt.friendlyDate(project.startDate) : '—') + ' → ' + (project.endDate ? fmt.friendlyDate(project.endDate) : '—')),
       el('div', { class: 'stat-row' }, [
         el('div', { class: 'stat' }, [el('div', { class: 'stat-label' }, 'Budget'), el('div', { class: 'stat-value' }, fmt.currency(budget))]),
