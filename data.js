@@ -24,6 +24,8 @@ function formatINR(n) {
 }
 function addDays(date, n) { const d = new Date(date); d.setDate(d.getDate() + n); return d; }
 function isoDateOnly(d) { return d.toISOString().slice(0, 10); }
+function daysSince(iso) { if (!iso) return 0; return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000)); }
+function isoDaysAgo(n) { return new Date(Date.now() - n * 86400000).toISOString(); }
 
 /* ---------------- seed data ---------------- */
 function seedDatabase() {
@@ -35,6 +37,9 @@ function seedDatabase() {
     version: SCHEMA_VERSION,
     settings: {
       name: 'Noel',
+      role: 'Creative Director',
+      location: 'Bangalore',
+      todayFocus: 'Close the Sonia proposal loop',
       cash: 3000,
       monthlyBurn: 55000,
       salaryGross: 150000,
@@ -44,7 +49,7 @@ function seedDatabase() {
       googleWorkspaceConnected: false,
     },
     tasks: [
-      { id: uid('t'), title: 'Finish Sonia proposal', description: '', category: 'Client Work', priority: 'P1', status: 'In Progress', due_date: tomorrow, due_time: null, client: 'Sonia', project: 'Sonia Website', tags: [], source: 'seed', created_at: nowIso(), updated_at: nowIso() },
+      { id: uid('t'), title: 'Finish Sonia proposal', description: '', category: 'Client Work', priority: 'P1', status: 'Waiting', due_date: tomorrow, due_time: null, client: 'Sonia', project: 'Sonia Website', tags: [], source: 'seed', created_at: isoDaysAgo(2), updated_at: isoDaysAgo(2) },
       { id: uid('t'), title: 'Follow up Azeem', description: '', category: 'Sales', priority: 'P2', status: 'Not Started', due_date: null, due_time: null, client: 'Azeem', project: null, tags: [], source: 'seed', created_at: nowIso(), updated_at: nowIso() },
       { id: uid('t'), title: 'Finish Fifth & Zero homepage', description: '', category: 'Fifth & Zero', priority: 'P2', status: 'In Progress', due_date: null, due_time: null, client: null, project: 'Fifth & Zero Website', tags: [], source: 'seed', created_at: nowIso(), updated_at: nowIso() },
       { id: uid('t'), title: 'Set up Fifth & Zero Instagram', description: '', category: 'Fifth & Zero', priority: 'P3', status: 'Not Started', due_date: null, due_time: null, client: null, project: 'Fifth & Zero Instagram', tags: [], source: 'seed', created_at: nowIso(), updated_at: nowIso() },
@@ -79,7 +84,7 @@ function seedDatabase() {
       { id: uid('rc'), name: 'Suraj', amount: 4800, status: 'pending' },
       { id: uid('rc'), name: 'Testimonial video edit', amount: 9000, status: 'pending' },
       { id: uid('rc'), name: 'Shoot reimbursement', amount: null, status: 'tbd' },
-      { id: uid('rc'), name: 'Azeem', amount: 30000, status: 'pending' },
+      { id: uid('rc'), name: 'Azeem', amount: 30000, status: 'pending', created_at: isoDaysAgo(4) },
       { id: uid('rc'), name: 'Ayush', amount: 20000, status: 'pending' },
       { id: uid('rc'), name: 'Shreya', amount: 35000, status: 'pending' },
       { id: uid('rc'), name: 'Shailesh', amount: 6400, status: 'pending' },
@@ -105,7 +110,7 @@ function seedDatabase() {
       { id: uid('l'), name: 'Additional work from Sonia after first project closes' },
     ],
     fifthZero: [
-      { id: 'website', name: 'Website', status: 'yellow', priority: 1, deadline: null },
+      { id: 'website', name: 'Website', status: 'yellow', priority: 1, deadline: null, blockedReason: 'Waiting on copy + images' },
       { id: 'instagram', name: 'Instagram', status: 'red', priority: 2, deadline: null },
       { id: 'linkedin', name: 'LinkedIn', status: 'red', priority: 3, deadline: null },
       { id: 'karan', name: 'Karan Spec', status: 'red', priority: 4, deadline: null },
@@ -342,6 +347,22 @@ function getMoneySummary() {
     burn: DB.settings.monthlyBurn,
   };
 }
+function getBlockers() {
+  const blockers = [];
+  DB.tasks.forEach(t => {
+    if (t.status === 'Waiting') blockers.push({ id: t.id, title: t.title, kind: 'WAITING', owner: t.client || 'You', days: daysSince(t.updated_at) });
+    else if (t.status === 'Blocked') blockers.push({ id: t.id, title: t.title, kind: 'BLOCKED', owner: t.client || 'You', days: daysSince(t.updated_at), reason: t.description || null });
+  });
+  DB.receivables.forEach(r => {
+    if (r.status === 'pending' && typeof r.amount === 'number' && r.created_at && daysSince(r.created_at) >= 3) {
+      blockers.push({ id: r.id, title: `${r.name} payment`, kind: 'OVERDUE', owner: r.name, days: daysSince(r.created_at) });
+    }
+  });
+  DB.fifthZero.forEach(f => {
+    if (f.blockedReason) blockers.push({ id: f.id, title: f.name, kind: 'BLOCKED', owner: 'Fifth & Zero', days: null, reason: f.blockedReason });
+  });
+  return blockers.sort((a, b) => (b.days || 0) - (a.days || 0));
+}
 function getTodayPriorities(limit) {
   const rank = { P1: 0, P2: 1, P3: 2, P4: 3 };
   return DB.tasks
@@ -362,8 +383,8 @@ const NoelData = {
   getClients, createClient, findClient, getPipeline, getLeads,
   getFifthZero, updateFifthZero,
   getInbox, addToInbox, removeFromInbox,
-  globalSearch, getMoneySummary, getTodayPriorities,
+  globalSearch, getMoneySummary, getTodayPriorities, getBlockers,
   logActivity, getActivityLog,
   resetDatabase,
-  uid, nowIso, addDays, isoDateOnly, formatINR,
+  uid, nowIso, addDays, isoDateOnly, formatINR, daysSince,
 };

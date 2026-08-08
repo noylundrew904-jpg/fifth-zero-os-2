@@ -7,6 +7,14 @@ app with real interactions, running entirely in the browser with zero
 setup, on a data layer designed to be swapped for Google Workspace without
 touching the UI.
 
+**Visual language:** dark OS + editorial data interface. Numbered modules
+(`01 // OPERATOR`, `02 // SESSION`, `a1 // LIQUID CASH`…), hairline
+dividers instead of heavy cards, outlined status pills, a monospace face
+for system chrome/metadata paired with an italic serif for the human
+voice (greeting, review notes). Colour is used only for meaning — red/
+orange/yellow/muted priority, green for positive — everything else is
+black, white and grey. See `style.css` for the full token system.
+
 No build step, no `npm install`. Open `index.html` or serve the folder.
 
 ## Run it
@@ -26,8 +34,15 @@ Bluestone, etc). It's also installable as a PWA (see below).
 ## What's real vs. what's a placeholder
 
 **Real and interactive today (Phase 1):**
-- Dashboard, Tasks, Ideas, Notes, Money (Overview/Debt/Receivables),
-  Pipeline, Fifth & Zero, Clients, Assistant, Settings, global search.
+- Dashboard (10 numbered modules: Operator, Session, Priorities, Key
+  Blockers, Money, Pipeline, Fifth & Zero, Ideas, Notes, Review), Tasks,
+  Finance (Overview/Liabilities/Receivables), CRM (Pipeline/Clients/Leads),
+  Fifth & Zero, Ideas, Notes, Calendar, Review, Memory, Assistant,
+  Settings, global search.
+- **Key Blockers** — computed automatically from real state, not
+  hand-entered: tasks stuck in `Waiting`/`Blocked` status, receivables
+  pending 3+ days, and any project carrying a `blockedReason`. Recalculates
+  live; nothing here is a fixed label.
 - Deterministic Level-1 capture: expenses, income, debt payments, tasks,
   ideas, notes, and multi-action voice notes — parsed with plain JS/regex,
   **no AI API call**, matching the spec's low-token requirement.
@@ -73,8 +88,8 @@ app.js        UI, router, all pages, capture pipeline, modals
 ## Files
 
 ```
-index.html      app shell, nav, modals, voice overlay
-style.css       dark charcoal + glassmorphism design system
+index.html      app shell, top session strip, nav, modals, voice overlay
+style.css       dark OS + editorial design system (modules, mono/serif type)
 data.js         data layer (see above)
 parser.js       deterministic capture engine
 voice.js        speech capture abstraction
@@ -90,10 +105,11 @@ config.js, supabase/   kept from the previous Supabase-backed iteration,
 ## Mobile / PWA
 
 Tested at 390×844 (mobile) and 1440×900 (desktop) with Playwright — no
-horizontal overflow, bottom nav + centred mic button on mobile, sidebar +
-floating capture dock on desktop. Add to Home Screen from a mobile
-browser to install; `sw.js` caches the app shell for offline use after the
-first load.
+horizontal overflow, bottom nav (`Home · Tasks · Talk · Finance ·
+Assistant`) with a raised mic button on mobile, sidebar + a single
+floating mic on desktop. Add to Home Screen from a mobile browser to
+install; `sw.js` caches the app shell for offline use after the first
+load.
 
 ## Memory
 

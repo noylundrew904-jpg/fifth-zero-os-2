@@ -15,44 +15,58 @@
 
 <div class="app-shell" id="appShell">
 
-  <!-- ===== Desktop sidebar ===== -->
-  <aside class="sidebar">
-    <div class="brand">
-      <img src="images/favicon.svg" alt="" />
-      <span class="brand-text">NOEL OS</span>
+  <!-- ===== Top session strip ===== -->
+  <div class="top-strip">
+    <div class="top-strip-left">
+      <span class="top-strip-dot" aria-hidden="true"></span>
+      <span>NOEL OS // V1</span>
     </div>
-    <nav class="nav-list" id="navList"></nav>
-    <div class="sidebar-foot">
-      <button class="nav-item" id="searchNavBtn">⌕ Search</button>
-      <div class="sync-status" id="syncStatus">Google Workspace: not connected</div>
+    <div class="top-strip-right">
+      <span id="stripStatus">GOOGLE WORKSPACE: NOT CONNECTED</span>
+      <span class="top-strip-clock tnum" id="stripClock">00:00:00</span>
     </div>
-  </aside>
+  </div>
 
-  <!-- ===== Main content ===== -->
-  <main class="main">
-    <header class="topbar">
-      <button class="icon-btn mobile-only" id="mobileMenuBtn" aria-label="Menu">☰</button>
-      <div class="topbar-title" id="topbarTitle">Home</div>
-      <button class="icon-btn" id="searchBtn" aria-label="Search">⌕</button>
-    </header>
-    <div class="page" id="pageRoot"></div>
-  </main>
+  <div class="shell-body">
+    <!-- ===== Desktop sidebar ===== -->
+    <aside class="sidebar">
+      <div class="brand">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" fill="#0a0a0c"/><rect x="10" y="10" width="28" height="28" rx="3" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="2.5"/><rect x="18" y="18" width="28" height="28" rx="3" fill="none" stroke="#ffffff" stroke-opacity="0.65" stroke-width="2.5"/><rect x="26" y="26" width="28" height="28" rx="3" fill="none" stroke="#cbb27a" stroke-width="2.5"/></svg>
+        <span class="brand-text">NOEL OS</span>
+      </div>
+      <nav class="nav-list" id="navList"></nav>
+      <div class="sidebar-foot">
+        <button class="nav-item" id="searchNavBtn" style="padding:0 0 4px;">⌕ SEARCH</button>
+      </div>
+    </aside>
+
+    <!-- ===== Main content ===== -->
+    <main class="main">
+      <header class="topbar">
+        <button class="icon-btn mobile-only" id="mobileMenuBtn" aria-label="Menu">☰</button>
+        <div class="topbar-title" id="topbarTitle">Home</div>
+        <button class="icon-btn" id="searchBtn" aria-label="Search">⌕</button>
+      </header>
+      <div class="page" id="pageRoot"></div>
+    </main>
+  </div>
 
   <!-- ===== Mobile bottom nav + mic ===== -->
   <nav class="bottom-nav mobile-only">
     <button class="bottom-nav-item" data-nav="home"><span>⌂</span>Home</button>
     <button class="bottom-nav-item" data-nav="tasks"><span>☑</span>Tasks</button>
-    <button class="mic-btn-wrap" id="micBtnMobileWrap">
-      <button class="mic-btn" id="micBtnMobile" aria-label="Hold to talk">🎙️</button>
-    </button>
-    <button class="bottom-nav-item" data-nav="money"><span>₹</span>Money</button>
+    <div class="mic-btn-wrap">
+      <button class="mic-btn" id="micBtnMobile" aria-label="Hold to capture">🎙️</button>
+      <span class="mic-caption">Talk</span>
+    </div>
+    <button class="bottom-nav-item" data-nav="money"><span>₹</span>Finance</button>
     <button class="bottom-nav-item" data-nav="assistant"><span>✦</span>Assistant</button>
   </nav>
 
-  <!-- ===== Desktop floating mic + quick capture ===== -->
+  <!-- ===== Desktop floating mic ===== -->
   <div class="desktop-capture-dock desktop-only">
-    <div class="quick-capture-row" id="quickCaptureRow"></div>
-    <button class="mic-btn mic-btn-lg" id="micBtnDesktop" aria-label="Hold to talk">🎙️</button>
+    <button class="mic-btn mic-btn-lg" id="micBtnDesktop" aria-label="Hold to capture">🎙️</button>
+    <span class="mic-caption">Hold to capture</span>
   </div>
 
 </div>
@@ -67,12 +81,12 @@
 <!-- ===== Confirmation modal ===== -->
 <div class="modal-backdrop" id="confirmModalBackdrop">
   <div class="modal confirm-modal" role="dialog" aria-modal="true">
-    <div class="modal-title">I understood:</div>
+    <div class="modal-title">CAPTURE // REVIEW BEFORE SAVE</div>
     <div id="confirmActionsList" class="confirm-actions-list"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="confirmCancelBtn">Cancel</button>
       <button class="btn btn-ghost" id="confirmEditBtn">Edit</button>
-      <button class="btn btn-primary" id="confirmAllBtn">Confirm all</button>
+      <button class="btn btn-primary" id="confirmAllBtn">Confirm ↵</button>
     </div>
   </div>
 </div>
@@ -88,14 +102,6 @@
       <button class="btn btn-ghost" data-ambiguous="Note">Note</button>
       <button class="btn btn-ghost" id="ambiguousCancelBtn">Cancel</button>
     </div>
-  </div>
-</div>
-
-<!-- ===== Quick capture generic modal ===== -->
-<div class="modal-backdrop" id="quickModalBackdrop">
-  <div class="modal" role="dialog" aria-modal="true">
-    <div class="modal-title" id="quickModalTitle">Add</div>
-    <div id="quickModalBody"></div>
   </div>
 </div>
 
