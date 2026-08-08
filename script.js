@@ -28,7 +28,7 @@
   };
 
   // Soft-deleted records past their 30-day window are purged once per
-  // load — cheap, and keeps localStorage from growing forever.
+  // load — cheap, and keeps the database from growing forever.
   const SOFT_DELETE_KEYS = ['tasks', 'clients', 'projects', 'notes', 'habits', 'health', 'calendar'];
   const SOFT_DELETE_FINANCE_FIELDS = ['transactions', 'invoices', 'subscriptions', 'loans'];
   function purgeExpiredArchive() {
@@ -72,16 +72,26 @@
     flashHighlight(highlight);
   }
 
-  window.addEventListener('hashchange', renderRoute);
-  window.addEventListener('DOMContentLoaded', () => {
+  function startApp() {
     purgeExpiredArchive();
     FZ.sidebar.mountSearch(searchHost, navigate);
     renderRoute();
+  }
+
+  window.addEventListener('hashchange', renderRoute);
+  window.addEventListener('DOMContentLoaded', () => {
+    // Nothing renders and no data loads until FZ.auth confirms a signed-in
+    // Supabase session and FZ.storage has fetched that user's data — see
+    // components/auth.js. startApp() runs every time that becomes true,
+    // including the first sign-in of a session.
+    FZ.auth.boot(startApp);
   });
 
-  // Registering the service worker is what makes the app installable and
-  // fully offline — safe to skip silently where unsupported (e.g. very old
-  // browsers), the app already works offline via localStorage regardless.
+  // Registering the service worker makes the app shell installable and
+  // fast to load; the data itself now lives in Supabase, so reads/writes
+  // still need a connection (see data/storage.js's outbox for what happens
+  // to a write made while offline). Safe to skip silently where
+  // unsupported (e.g. very old browsers).
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js').catch(() => {});

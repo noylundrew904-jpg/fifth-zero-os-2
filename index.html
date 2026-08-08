@@ -12,8 +12,13 @@
 </head>
 <body>
 
+<!-- ============ AUTH GATE ============
+     Shown until a real Supabase session exists; the app shell below stays
+     hidden the whole time so no module ever renders against empty data. -->
+<div id="authRoot"></div>
+
 <!-- ============ APP SHELL ============ -->
-<div class="app-shell">
+<div class="app-shell" id="appShell" hidden>
   <aside class="sidebar">
     <div class="brand">
       <img src="images/favicon.svg" alt="" />
@@ -30,8 +35,14 @@
 <!-- ============ SCRIPTS ============
      Plain scripts (no bundler, no ES modules) so the app runs by simply
      opening index.html — every file attaches to the shared FZ namespace.
-     Load order matters: data/utils first, components next, modules after,
+     Load order matters: the Supabase client and data layer first (auth +
+     storage depend on it), utils/components next, modules after,
      script.js (bootstrap + router) last. -->
+<!-- Vendored (not CDN-loaded) so the app has one fewer external origin to
+     depend on at runtime — see vendor/README.md for the version/update. -->
+<script src="vendor/supabase-js.umd.js"></script>
+<script src="config.js"></script>
+<script src="data/supabaseClient.js"></script>
 <script src="data/storage.js"></script>
 <script src="utils/id.js"></script>
 <script src="utils/format.js"></script>
@@ -50,6 +61,7 @@
 <script src="components/listRow.js"></script>
 <script src="components/search.js"></script>
 <script src="components/sidebar.js"></script>
+<script src="components/auth.js"></script>
 
 <script src="modules/tasks.js"></script>
 <script src="modules/finance.js"></script>

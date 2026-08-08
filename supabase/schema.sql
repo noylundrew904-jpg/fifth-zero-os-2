@@ -1,83 +1,112 @@
 -- ============================================================
--- Fifth Zero OS — Supabase schema
--- Run this in Supabase Dashboard -> SQL Editor -> New query -> Run
+-- Fifth & Zero OS — Supabase schema
+--
+-- Mirrors the app's existing localStorage collections 1:1 so the
+-- client-side data layer (data/storage.js) can swap its backing store
+-- without any module code changing. Each row's `payload` jsonb IS the
+-- exact record object the app already works with (same field names,
+-- including its own `deletedAt` used by the soft-delete/archive system).
+--
+-- Run this once in Supabase Dashboard -> SQL Editor -> New query -> Run.
+-- Safe to re-run (every statement is idempotent).
 -- ============================================================
 
-create extension if not exists "uuid-ossp";
+create extension if not exists "pgcrypto";
 
--- CLIENTS -----------------------------------------------------
-create table if not exists clients (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid references auth.users(id) not null default auth.uid(),
-  name text not null,
-  org text,
-  status text default 'active',        -- active | prospect | past
-  column_key text default 'later',     -- overdue | today | this_week | later
-  tag text default 'WARM',             -- HOT | WARM | COOL
-  note text,
-  category text,
-  created_at timestamptz default now()
-);
+-- ---- helper: keep updated_at current on every write -----------------------
+create or replace function fz_set_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
 
--- PROJECTS ------------------------------------------------------
-create table if not exists projects (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid references auth.users(id) not null default auth.uid(),
-  name text not null,
-  client text,
-  status text default 'active',        -- active | waiting | someday | archived
-  progress int default 0,
-  next_task text,
-  deadline text,
-  created_at timestamptz default now()
-);
+-- ---- array-type collections -------------------------------------------
+-- One row per record. `id` matches the app-generated id in payload->>'id'.
+-- user_id scopes every row to its owner; RLS below is what actually
+-- enforces the boundary (the default is a convenience, not the guarantee).
 
--- INVOICES ------------------------------------------------------
-create table if not exists invoices (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid references auth.users(id) not null default auth.uid(),
-  client text not null,
-  amount numeric not null,
-  status text default 'pending',       -- pending | paid | overdue
-  due_date date,
-  created_at timestamptz default now()
-);
+do $$
+declare
+  t text;
+begin
+  foreach t in array array['tasks', 'clients', 'projects', 'health', 'habits', 'notes', 'calendar']
+  loop
+    execute format($f$
+      create table if not exists fz_%1$s (
+        id uuid primary key default gen_random_uuid(),
+        user_id uuid not null default auth.uid() references auth.users(id) on delete cascade,
+        payload jsonb not null,
+        created_at timestamptz not null default now(),
+        updated_at timestamptz not null default now()
+      );
+    $f$, t);
 
--- JOURNAL ENTRIES -------------------------------------------------
-create table if not exists journal_entries (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid references auth.users(id) not null default auth.uid(),
-  entry_date date default current_date,
-  content text not null,
-  created_at timestamptz default now()
-);
+    execute format('alter table fz_%1$s enable row level security;', t);
 
--- INBOX / CAPTURE -------------------------------------------------
-create table if not exists inbox_items (
-  id uuid primary key default uuid_generate_v4(),
-  user_id uuid references auth.users(id) not null default auth.uid(),
-  content text not null,
-  category text,
-  reviewed boolean default false,
-  created_at timestamptz default now()
+    execute format($f$
+      drop policy if exists "own rows only" on fz_%1$s;
+      create policy "own rows only" on fz_%1$s
+        for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+    $f$, t);
+
+    execute format($f$
+      drop trigger if exists set_updated_at on fz_%1$s;
+      create trigger set_updated_at before update on fz_%1$s
+        for each row execute function fz_set_updated_at();
+    $f$, t);
+
+    execute format('create index if not exists fz_%1$s_user_id_idx on fz_%1$s (user_id);', t);
+  end loop;
+end $$;
+
+-- ---- singleton collections ----------------------------------------------
+-- `finance` ({transactions, subscriptions, loans, invoices}) and
+-- `settings` ({theme, name}) are single objects per user, not arrays —
+-- one row per user, keyed by user_id itself.
+
+create table if not exists fz_finance (
+  user_id uuid primary key default auth.uid() references auth.users(id) on delete cascade,
+  payload jsonb not null default '{"transactions":[],"subscriptions":[],"loans":[],"invoices":[]}'::jsonb,
+  updated_at timestamptz not null default now()
 );
+alter table fz_finance enable row level security;
+drop policy if exists "own row only" on fz_finance;
+create policy "own row only" on fz_finance
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop trigger if exists set_updated_at on fz_finance;
+create trigger set_updated_at before update on fz_finance
+  for each row execute function fz_set_updated_at();
+
+create table if not exists fz_settings (
+  user_id uuid primary key default auth.uid() references auth.users(id) on delete cascade,
+  payload jsonb not null default '{"theme":"dark","name":""}'::jsonb,
+  updated_at timestamptz not null default now()
+);
+alter table fz_settings enable row level security;
+drop policy if exists "own row only" on fz_settings;
+create policy "own row only" on fz_settings
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop trigger if exists set_updated_at on fz_settings;
+create trigger set_updated_at before update on fz_settings
+  for each row execute function fz_set_updated_at();
 
 -- ============================================================
--- ROW LEVEL SECURITY -- each user only ever sees their own rows
+-- Notes
+--
+-- * auth.users is Supabase's built-in user table — sign-up/sign-in/
+--   sign-out/password-reset are handled entirely by Supabase Auth, no
+--   custom user table needed.
+-- * RLS policies use `for all` (select/insert/update/delete) so a user
+--   can only ever read or write rows where user_id = auth.uid() — one
+--   user can never see or modify another user's data, enforced at the
+--   database layer regardless of what the frontend sends.
+-- * There is no service-role key anywhere in this file or in the app —
+--   every table is designed to be safely queried with the public anon
+--   key precisely because RLS (not key secrecy) is the security boundary.
+-- * default auth.uid() on user_id means the frontend never has to (and
+--   never should) set user_id itself on insert — Postgres stamps it from
+--   the authenticated session, so a malicious client can't write rows
+--   under someone else's id even if it tried.
 -- ============================================================
-alter table clients enable row level security;
-alter table projects enable row level security;
-alter table invoices enable row level security;
-alter table journal_entries enable row level security;
-alter table inbox_items enable row level security;
-
-create policy "own rows only" on clients
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-create policy "own rows only" on projects
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-create policy "own rows only" on invoices
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-create policy "own rows only" on journal_entries
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
-create policy "own rows only" on inbox_items
-  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);

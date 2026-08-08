@@ -47,6 +47,7 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
 /* ---- App shell ---------------------------------------------------------- */
 
 .app-shell { display: flex; min-height: 100vh; }
+.app-shell[hidden] { display: none; }
 
 .sidebar {
   width: var(--sidebar-w);
@@ -333,6 +334,32 @@ button, input, select, textarea { font-family: inherit; font-size: inherit; colo
 .calendar-cell-today { border-color: var(--accent); }
 .calendar-day-num { font-size: 13px; }
 .calendar-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+
+/* ---- Auth ------------------------------------------------------------------------ */
+
+.auth-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 24px; background: var(--bg);
+}
+.auth-card {
+  width: 100%; max-width: 380px; background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 32px 28px; display: flex; flex-direction: column; gap: 18px;
+}
+.auth-brand { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+.auth-brand img { width: 24px; height: 24px; }
+.auth-subtitle { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; margin: -6px 0 0; }
+.auth-body { color: var(--text-dim); font-size: 13.5px; line-height: 1.5; margin: 0; }
+.auth-error { color: var(--danger); font-size: 13px; margin: -6px 0 0; }
+.auth-links { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.auth-link { background: none; border: none; color: var(--accent); font-size: 13px; cursor: pointer; padding: 0; text-align: left; }
+.auth-link:hover { text-decoration: underline; }
+
+/* ---- Sync status (Settings) --------------------------------------------------------- */
+
+.sync-status { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-dim); }
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
+.sync-dot-pending { background: var(--warning); }
+.sync-dot-error { background: var(--danger); }
 
 /* ---- Toast ----------------------------------------------------------------------- */
 

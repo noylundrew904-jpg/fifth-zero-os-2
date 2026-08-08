@@ -8,17 +8,20 @@
    new files instead of serving a stale cache forever.
    ========================================================================== */
 
-const CACHE_NAME = 'fz-shell-v1';
+const CACHE_NAME = 'fz-shell-v2';
 
 const APP_SHELL = [
   './',
   'index.html',
   'styles.css',
   'script.js',
+  'config.js',
   'manifest.json',
   'images/favicon.svg',
   'images/logo.svg',
 
+  'vendor/supabase-js.umd.js',
+  'data/supabaseClient.js',
   'data/storage.js',
 
   'utils/id.js',
@@ -38,6 +41,7 @@ const APP_SHELL = [
   'components/listRow.js',
   'components/search.js',
   'components/sidebar.js',
+  'components/auth.js',
 
   'modules/tasks.js',
   'modules/finance.js',
@@ -85,6 +89,12 @@ self.addEventListener('fetch', (event) => {
     );
     return;
   }
+
+  // Only the same-origin app shell is cache-first. Supabase API calls and
+  // the supabase-js CDN script are cross-origin and MUST go straight to the
+  // network every time — caching a database response here would silently
+  // serve stale data instead of what's actually in Postgres.
+  if (!request.url.startsWith(self.location.origin)) return;
 
   event.respondWith(
     caches.match(request).then((cached) => cached || fetch(request).then((response) => {
