@@ -14,13 +14,17 @@
 create extension if not exists "pgcrypto";
 
 -- ---- helper: keep updated_at current on every write -----------------------
+-- `set search_path = public` pins the function's search path so it can't be
+-- hijacked by a search_path set earlier in the same session (Supabase's
+-- database linter flags this — see function_search_path_mutable).
 create or replace function fz_set_updated_at()
 returns trigger as $$
 begin
   new.updated_at = now();
   return new;
 end;
-$$ language plpgsql;
+$$ language plpgsql
+set search_path = public;
 
 -- ---- array-type collections -------------------------------------------
 -- One row per record. `id` matches the app-generated id in payload->>'id'.

@@ -53,9 +53,10 @@
      components/auth.js, every module) only ever calls FZ.dataAdapter.* /
      FZ.authAdapter.*, never Supabase directly — that indirection is what
      makes Development Mode possible without a second code path. -->
-<!-- Vendored (not CDN-loaded) so the app has one fewer external origin to
-     depend on at runtime — see vendor/README.md for the version/update. -->
-<script src="vendor/supabase-js.umd.js"></script>
+<!-- supabase-js from jsdelivr. vendor/supabase-js.umd.js holds the same
+     build for a CDN-independent option (see vendor/README.md) — swap this
+     tag to that path if you'd rather not depend on the CDN at runtime. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="config.js"></script>
 <script src="data/supabaseClient.js"></script>
 <script src="data/adapters/supabaseDataAdapter.js"></script>
