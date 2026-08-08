@@ -2,48 +2,119 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Fifth Zero OS</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>NOEL OS</title>
+<meta name="description" content="Noel's personal AI operating system — tasks, money, ideas, notes and voice capture in one calm place." />
+<meta name="theme-color" content="#0a0a0c" />
+<link rel="manifest" href="manifest.json" />
 <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
+<link rel="apple-touch-icon" href="images/icon-192.svg" />
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<!-- ============ AUTH SCREEN ============ -->
-<div class="auth-wrap" id="authWrap">
-  <div class="auth-card">
-    <div class="auth-title serif">Fifth Zero OS</div>
-    <div class="auth-sub" id="authSub">Sign in to your operating system</div>
-    <form id="authForm">
-      <div class="field"><label>Email</label><input type="email" id="authEmail" required /></div>
-      <div class="field"><label>Password</label><input type="password" id="authPassword" required minlength="6" /></div>
-      <div class="error-text" id="authError"></div>
-      <button class="btn btn-primary" id="authSubmit" style="width:100%;justify-content:center;margin-top:6px;">Sign in</button>
-    </form>
-    <button class="auth-toggle" id="authToggle">Don't have an account? Sign up</button>
-  </div>
-</div>
-
-<!-- ============ APP SHELL ============ -->
 <div class="app-shell" id="appShell">
+
+  <!-- ===== Desktop sidebar ===== -->
   <aside class="sidebar">
     <div class="brand">
       <img src="images/favicon.svg" alt="" />
-      <span class="brand-text">Fifth Zero</span>
+      <span class="brand-text">NOEL OS</span>
     </div>
     <nav class="nav-list" id="navList"></nav>
-    <div class="userbox">
-      <div class="avatar" id="userAvatar">N</div>
-      <div class="userbox-email" id="userEmail"></div>
-      <button class="signout" id="signOutBtn">Sign out</button>
+    <div class="sidebar-foot">
+      <button class="nav-item" id="searchNavBtn">⌕ Search</button>
+      <div class="sync-status" id="syncStatus">Google Workspace: not connected</div>
     </div>
   </aside>
-  <main class="main"><div class="page" id="pageRoot"></div></main>
+
+  <!-- ===== Main content ===== -->
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn mobile-only" id="mobileMenuBtn" aria-label="Menu">☰</button>
+      <div class="topbar-title" id="topbarTitle">Home</div>
+      <button class="icon-btn" id="searchBtn" aria-label="Search">⌕</button>
+    </header>
+    <div class="page" id="pageRoot"></div>
+  </main>
+
+  <!-- ===== Mobile bottom nav + mic ===== -->
+  <nav class="bottom-nav mobile-only">
+    <button class="bottom-nav-item" data-nav="home"><span>⌂</span>Home</button>
+    <button class="bottom-nav-item" data-nav="tasks"><span>☑</span>Tasks</button>
+    <button class="mic-btn-wrap" id="micBtnMobileWrap">
+      <button class="mic-btn" id="micBtnMobile" aria-label="Hold to talk">🎙️</button>
+    </button>
+    <button class="bottom-nav-item" data-nav="money"><span>₹</span>Money</button>
+    <button class="bottom-nav-item" data-nav="assistant"><span>✦</span>Assistant</button>
+  </nav>
+
+  <!-- ===== Desktop floating mic + quick capture ===== -->
+  <div class="desktop-capture-dock desktop-only">
+    <div class="quick-capture-row" id="quickCaptureRow"></div>
+    <button class="mic-btn mic-btn-lg" id="micBtnDesktop" aria-label="Hold to talk">🎙️</button>
+  </div>
+
 </div>
 
-<!-- Supabase JS client (UMD build via CDN) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="script.js"></script>
+<!-- ===== Voice overlay ===== -->
+<div class="voice-overlay" id="voiceOverlay">
+  <div class="voice-pulse" id="voicePulse"></div>
+  <div class="voice-state" id="voiceState">Listening…</div>
+  <div class="voice-transcript" id="voiceTranscript"></div>
+</div>
+
+<!-- ===== Confirmation modal ===== -->
+<div class="modal-backdrop" id="confirmModalBackdrop">
+  <div class="modal confirm-modal" role="dialog" aria-modal="true">
+    <div class="modal-title">I understood:</div>
+    <div id="confirmActionsList" class="confirm-actions-list"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="confirmCancelBtn">Cancel</button>
+      <button class="btn btn-ghost" id="confirmEditBtn">Edit</button>
+      <button class="btn btn-primary" id="confirmAllBtn">Confirm all</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Ambiguous inbox modal ===== -->
+<div class="modal-backdrop" id="ambiguousModalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-title" id="ambiguousModalTitle">I'm not sure what this is</div>
+    <div class="modal-sub" id="ambiguousModalText"></div>
+    <div class="modal-actions modal-actions-wrap">
+      <button class="btn btn-ghost" data-ambiguous="Task">Task</button>
+      <button class="btn btn-ghost" data-ambiguous="Idea">Idea</button>
+      <button class="btn btn-ghost" data-ambiguous="Note">Note</button>
+      <button class="btn btn-ghost" id="ambiguousCancelBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Quick capture generic modal ===== -->
+<div class="modal-backdrop" id="quickModalBackdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-title" id="quickModalTitle">Add</div>
+    <div id="quickModalBody"></div>
+  </div>
+</div>
+
+<!-- ===== Global search modal ===== -->
+<div class="modal-backdrop" id="searchModalBackdrop">
+  <div class="modal search-modal" role="dialog" aria-modal="true">
+    <input type="text" id="searchInput" class="search-input" placeholder="Search tasks, ideas, notes, clients, activity…" />
+    <div id="searchResults" class="search-results"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" id="searchCloseBtn">Close</button></div>
+  </div>
+</div>
+
+<!-- ===== Toast container ===== -->
+<div class="toast-stack" id="toastStack"></div>
+
+<script src="data.js"></script>
+<script src="parser.js"></script>
+<script src="voice.js"></script>
+<script src="assistant.js"></script>
+<script src="app.js"></script>
 </body>
 </html>

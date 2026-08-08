@@ -1,66 +1,178 @@
-# Fifth Zero OS — static site (index.html / style.css / script.js)
+# NOEL OS
 
-Same live app as before (Supabase-backed Inbox, Projects, Clients, Finance,
-Journal, gated behind login) — rebuilt as a plain static site instead of a
-Next.js project. No build step, no `npm install` needed to run it.
+Noel's personal AI operating system — tasks, priorities, ideas, notes,
+money, debt, pipeline and Fifth & Zero, captured by voice or text and
+organised automatically. This is **Phase 1** of the build: a fully working
+app with real interactions, running entirely in the browser with zero
+setup, on a data layer designed to be swapped for Google Workspace without
+touching the UI.
 
-## Folder contents
-```
-index.html      the whole app shell + auth screen
-style.css       all styling
-script.js       all logic (auth + Supabase CRUD)
-config.js       <- put your Supabase URL + anon key here
-images/         favicon.svg, logo.svg
-fonts/          see fonts/README.txt (works via Google Fonts CDN by default)
-supabase/       schema.sql — run this in Supabase once
-```
+No build step, no `npm install`. Open `index.html` or serve the folder.
 
-## 1. Set up Supabase (~3 min)
-1. [supabase.com](https://supabase.com) → New project.
-2. SQL Editor → New query → paste all of `supabase/schema.sql` → Run.
-   This creates the 5 tables and locks every row to its owner (RLS), so the
-   public anon key can never see or touch another user's data.
-3. Project Settings → API → copy the **Project URL** and **anon public** key.
-4. (Optional, convenience) Authentication → Providers → Email → turn off
-   "Confirm email" so you can sign up and use it immediately.
+## Run it
 
-## 2. Fill in config.js
-Open `config.js` and paste in the two values from step 1:
-```js
-const SUPABASE_URL = 'https://your-project-ref.supabase.co';
-const SUPABASE_ANON_KEY = 'your-anon-public-key';
-```
-
-## 3. Try it locally
-Just open `index.html` directly in a browser, or serve the folder:
 ```bash
 npx serve .
+# or
+python3 -m http.server 8080
 ```
 
-## 4. Deploy for real
-Because this is a static site (no build step), any of these work:
+Then open the printed local URL. Everything works immediately — voice
+capture, quick capture, tasks, money, debt, pipeline, ideas, notes, the
+assistant, global search, and the confirmation flow — using realistic
+seeded data from the spec (Sonia, Azeem, Shreya, Clyde, Marlyne, Mai, CRED,
+Bluestone, etc). It's also installable as a PWA (see below).
 
-**Vercel** (drag-and-drop, no CLI needed):
-- Go to vercel.com/new → drag this whole folder onto the page → Deploy.
-- Since there's no framework to detect, Vercel just serves the files as-is.
+## What's real vs. what's a placeholder
 
-**Netlify:**
-- netlify.com/drop → drag the folder → get a live URL instantly.
+**Real and interactive today (Phase 1):**
+- Dashboard, Tasks, Ideas, Notes, Money (Overview/Debt/Receivables),
+  Pipeline, Fifth & Zero, Clients, Assistant, Settings, global search.
+- Deterministic Level-1 capture: expenses, income, debt payments, tasks,
+  ideas, notes, and multi-action voice notes — parsed with plain JS/regex,
+  **no AI API call**, matching the spec's low-token requirement.
+- Voice capture via the browser's built-in SpeechRecognition (real speech
+  → text → classification → confirmation → dashboard update).
+- Confirmation-before-write for every financial change, an ambiguous-input
+  flow that asks Task/Idea/Note instead of guessing, and Undo on every
+  captured action (session-scoped).
+- Assistant chat that answers only from data actually stored in the app —
+  it never fabricates a number.
+- All data persists to `localStorage` in this browser and updates the
+  dashboard immediately — no manual refresh anywhere.
 
-**GitHub Pages:**
-- Push the folder to a GitHub repo → Settings → Pages → deploy from the
-  main branch root.
+**Explicitly not connected yet — labelled "Not connected" in the UI itself
+rather than faked:**
+- Google Sheets / Docs / Drive / Calendar / Gmail / Chat (Phases 2–4, 8).
+  `data.js` is the single seam this plugs into later — see below.
+- A model-based AI fallback for ambiguous or multi-dataset reasoning
+  (Phase 7). The Assistant is template-based over real data today; it
+  says so plainly when it can't answer something instead of guessing.
+- Google OAuth / account sign-in (Phase 2). The Supabase-backed
+  `config.js` / `supabase/schema.sql` from the previous iteration of this
+  repo are kept as-is for a future persistence phase but aren't wired into
+  NOEL OS yet.
 
-No environment variables needed at deploy time — the Supabase keys are
-already sitting in `config.js`, and that's fine: the anon key is meant to be
-public, Row Level Security is what actually protects your data.
+## Data abstraction
 
-## What's real vs. not yet
-- **Real**: Inbox, Projects, Clients, Finance, Journal — full add/edit/delete,
-  persisted in Supabase, private to your logged-in account.
-- **Not yet wired**: Today, Calendar, AI Console, Health, Memory, Ideas,
-  Knowledge, Settings, Fifth Zero, Job Dashboard — same pattern (a table +
-  a render function) extends to these whenever you want them built out.
-- **No AI auto-classification** on Inbox yet — capture works, but nothing
-  automatically files it for you. That layer needs a backend function
-  calling an LLM on top of this.
+`data.js` is the *only* file that touches storage. Every other file calls
+functions like `getTasks()`, `createTask()`, `payDebt()`,
+`getMoneySummary()`. Swapping the body of these functions for Google
+Sheets/Docs calls later requires no UI changes — this is what section 76
+of the spec asks for ("UI → Data Service → mock data → Google Workspace").
+
+```
+data.js       storage + seed data + all CRUD + computed money/debt values
+parser.js     Level 1 deterministic capture (regex, no network call)
+voice.js      transcribeAudio() — wraps the browser's SpeechRecognition;
+              swap the body for Whisper/Deepgram/Google STT later
+assistant.js  rule-based Q&A over real stored data (Level 1, no AI)
+app.js        UI, router, all pages, capture pipeline, modals
+```
+
+## Files
+
+```
+index.html      app shell, nav, modals, voice overlay
+style.css       dark charcoal + glassmorphism design system
+data.js         data layer (see above)
+parser.js       deterministic capture engine
+voice.js        speech capture abstraction
+assistant.js    rule-based assistant
+app.js          UI / router / capture pipeline
+manifest.json   PWA manifest
+sw.js           offline shell caching
+images/         icons, favicon, logo
+config.js, supabase/   kept from the previous Supabase-backed iteration,
+                       not currently used by NOEL OS
+```
+
+## Mobile / PWA
+
+Tested at 390×844 (mobile) and 1440×900 (desktop) with Playwright — no
+horizontal overflow, bottom nav + centred mic button on mobile, sidebar +
+floating capture dock on desktop. Add to Home Screen from a mobile
+browser to install; `sw.js` caches the app shell for offline use after the
+first load.
+
+## Memory
+
+Today "memory" is Notes + Activity Log, persisted to `localStorage` in
+this browser. The Memory page shows the eight Google Docs this becomes in
+Phase 4 (Personal Context, Fifth & Zero, Business Strategy, Client
+Context, Decisions, Ideas, SOPs, Important Conversations) — each is
+labelled "Not connected" until that phase lands, rather than faked.
+
+## Voice
+
+`voice.js` exposes one function, `transcribeAudio()`, wrapping the
+browser's native `SpeechRecognition` API (Chrome/Edge; free, no API key,
+needs a secure context). Hold-to-talk shows Listening… → Understanding… →
+Updated. On unsupported browsers it fails gracefully with a message
+pointing at the text capture bar instead of silently doing nothing. A
+dedicated STT provider can replace the function body later without
+touching any caller.
+
+## Google Workspace
+
+Not connected yet (see "what's a placeholder" above). Every place this
+matters is labelled "Not connected" in the Settings, Memory, and Calendar
+pages rather than simulated.
+
+## Security
+
+- No credentials or API keys anywhere in this code — there's nothing to
+  connect to yet.
+- No financial figures are hardcoded in the UI; every number on Money,
+  Debt, Receivables and the dashboard is computed live from `data.js`.
+- Financial changes (expenses, income, debt payments) always require
+  confirmation before they're written — see `processCapture()` in
+  `app.js`.
+- When Google OAuth lands (Phase 2), tokens will be handled server-side,
+  least-privilege scopes only.
+
+## Cost
+
+Phase 1 costs **$0** to run: static files, browser `localStorage`, the
+browser's built-in speech recognition. No AI API is called anywhere in
+this phase — that's the point of the Level 1/Level 2 architecture in the
+spec. Google Workspace APIs (Phase 2+) are free within Google's standard
+quotas. Any AI fallback added in Phase 7 would be the only line item with
+a per-call cost, and only fires on inputs Level 1 can't classify.
+
+## QA
+
+Verified with an automated Playwright pass against a local server,
+covering all 10 required test cases from the spec plus interaction and
+responsive checks — 40/40 passing:
+
+- Deterministic expense ("Spent ₹850 on food.") → Expense, ₹850, Food,
+  cash reduced, no AI call.
+- Debt payment ("Paid Clyde ₹5,000.") → Clyde marked paid, total debt
+  reduced by exactly ₹5,000.
+- Income ("Azeem paid ₹30,000.") → cash +₹30,000, Azeem's receivable
+  reduced to ₹0.
+- Task with due date ("Finish the Fifth & Zero website tomorrow.") →
+  Task, Fifth & Zero, due date set, auto-applied (non-financial).
+- Idea ("Idea — Fifth & Zero should make brands behave like
+  characters.") → Idea filed under Fifth & Zero.
+- Note ("Remember Sonia prefers minimal websites.") → Note, Client:
+  Sonia.
+- Multi-action ("Spent ₹700 on fuel, Azeem paid ₹30k and remind me to
+  send Sonia the proposal tomorrow.") → 3 actions split correctly, net
+  cash change exactly +₹29,300.
+- Ambiguous input ("I was thinking about that Sonia thing.") → asks
+  Task/Idea/Note instead of guessing.
+- Assistant planning/search queries ("What should I do today?", "What
+  do I know about Sonia?") → answered from real stored data only.
+- Navigation, priority changes, task completion, idea→task conversion,
+  global search, and mobile/desktop layout at 390×844 and 1440×900 — all
+  verified interactive, not decorative.
+
+## Roadmap (Phases 2–10)
+
+Google OAuth → Sheets persistence → Docs/Drive memory → dedicated speech
+provider → richer classification → AI fallback for ambiguous/complex
+reasoning → Calendar/Gmail/Chat → final security/QA pass. Each phase is
+additive on top of the same `data.js` seam — the UI already assumes
+nothing about where the data comes from.
