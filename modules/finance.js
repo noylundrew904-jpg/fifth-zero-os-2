@@ -72,6 +72,26 @@
     if (onDone) onDone();
   }
 
+  // Reverses markInvoicePaid: the invoice goes back to pending and its
+  // auto-generated transaction is soft-deleted (recoverable from Archive,
+  // consistent with every other delete in the app) rather than hard-removed,
+  // so cash available and revenue figures stay correct without losing history.
+  function unmarkInvoicePaid(invoiceId, onDone) {
+    const d = data();
+    const invoice = d.invoices.find((inv) => inv.id === invoiceId);
+    if (!invoice || invoice.status !== 'paid') return;
+
+    invoice.status = 'pending';
+    if (invoice.transactionId) {
+      d.transactions = FZ.archive.softDeleteById(d.transactions, invoice.transactionId);
+      invoice.transactionId = '';
+    }
+
+    save(d);
+    FZ.toast.show('Invoice marked unpaid — its income transaction was removed');
+    if (onDone) onDone();
+  }
+
   // ---- Transactions -----------------------------------------------------------
 
   function openTransactionForm(type, onSaved) {
@@ -307,7 +327,8 @@
           meta: 'Due ' + fmt.friendlyDate(inv.dueDate),
           tag: inv.status,
           tagClass: inv.status === 'paid' ? 'success' : inv.status === 'overdue' ? 'danger' : 'default',
-          onToggle: inv.status === 'paid' ? null : () => markInvoicePaid(inv.id, rerender),
+          checked: inv.status === 'paid',
+          onToggle: () => (inv.status === 'paid' ? unmarkInvoicePaid(inv.id, rerender) : markInvoicePaid(inv.id, rerender)),
           onDelete: () => FZ.deleteFlow.run({
             label: 'Invoice',
             onDelete: () => { const nd = data(); nd.invoices = FZ.archive.softDeleteById(nd.invoices, inv.id); save(nd); },
@@ -333,6 +354,6 @@
   FZ.modules = FZ.modules || {};
   FZ.modules.finance = {
     render, openTransactionForm, openSubscriptionForm, openLoanForm, openInvoiceForm,
-    cashAvailable, pendingPaymentsTotal, revenueByClient, markInvoicePaid, monthlyNetTotals,
+    cashAvailable, pendingPaymentsTotal, revenueByClient, markInvoicePaid, unmarkInvoicePaid, monthlyNetTotals,
   };
 })(window.FZ = window.FZ || {});

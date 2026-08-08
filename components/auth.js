@@ -1,8 +1,12 @@
 /* ==========================================================================
-   FZ.auth — the sign-in gate. Nothing in the app renders, and no database
-   read ever happens, until a real Supabase session exists: every table's
-   RLS policy is keyed off auth.uid(), so an unauthenticated request simply
-   returns no rows rather than anything belonging to someone else.
+   FZ.auth — the sign-in gate. Nothing in the app renders, and no data
+   fetch ever happens, until a session exists from FZ.authAdapter (the
+   Supabase adapter in production, the local Development Mode adapter
+   otherwise — see data/appMode.js). This file only ever calls
+   FZ.authAdapter.*, never Supabase directly, so it behaves identically in
+   both modes. In production every table's RLS policy is keyed off
+   auth.uid(), so an unauthenticated request simply returns no rows rather
+   than anything belonging to someone else.
 
    Flow: boot() checks for an existing session, subscribes to auth state
    changes (sign in / sign out / password recovery), and toggles between
@@ -38,6 +42,7 @@
           el('img', { src: 'images/favicon.svg', alt: '' }),
           el('span', {}, 'Fifth & Zero'),
         ]),
+        FZ.isDevMode ? el('div', { class: 'auth-mode-tag' }, 'Development Mode — accounts are local to this browser') : null,
         ...children,
       ]),
     ]);
@@ -92,7 +97,7 @@
         e.preventDefault();
         const submitBtn = form.querySelector('button[type=submit]');
         submitBtn.disabled = true;
-        const { error } = await FZ.supabase.auth.signInWithPassword({
+        const { error } = await FZ.authAdapter.signInWithPassword({
           email: emailField.input.value.trim(),
           password: passwordField.input.value,
         });
@@ -133,7 +138,7 @@
         e.preventDefault();
         const submitBtn = form.querySelector('button[type=submit]');
         submitBtn.disabled = true;
-        const { data, error } = await FZ.supabase.auth.signUp({
+        const { data, error } = await FZ.authAdapter.signUp({
           email: emailField.input.value.trim(),
           password: passwordField.input.value,
         });
@@ -196,7 +201,7 @@
         e.preventDefault();
         const submitBtn = form.querySelector('button[type=submit]');
         submitBtn.disabled = true;
-        const { error } = await FZ.supabase.auth.resetPasswordForEmail(emailField.input.value.trim(), {
+        const { error } = await FZ.authAdapter.resetPasswordForEmail(emailField.input.value.trim(), {
           redirectTo: window.location.origin + window.location.pathname,
         });
         if (error) {
@@ -233,7 +238,7 @@
         e.preventDefault();
         const submitBtn = form.querySelector('button[type=submit]');
         submitBtn.disabled = true;
-        const { error } = await FZ.supabase.auth.updateUser({ password: passwordField.input.value });
+        const { error } = await FZ.authAdapter.updateUser({ password: passwordField.input.value });
         if (error) {
           submitBtn.disabled = false;
           renderNewPassword(error.message);
@@ -257,7 +262,17 @@
 
   // ---- Boot / session lifecycle --------------------------------------------
 
+  // Guards against a real race: production supabase-js fires an
+  // INITIAL_SESSION event through onAuthStateChange asynchronously, which
+  // can land while checkInitialSession()'s own getSession() call is still
+  // awaiting FZ.storage.init() for the same user — isReady() alone doesn't
+  // catch that window, since it only flips true once init() finishes.
+  // Without this, both paths would call FZ.storage.init() concurrently.
+  let signingIn = false;
+
   async function handleSignedIn(user) {
+    if (signingIn) return;
+    signingIn = true;
     renderLoading('Loading your workspace…');
     try {
       await FZ.storage.init(user.id);
@@ -266,16 +281,18 @@
     } catch (err) {
       console.error('FZ.auth: failed to load data after sign-in', err);
       renderErrorScreen('We couldn’t load your data. This usually means a network hiccup — check your connection and try again.', () => handleSignedIn(user));
+    } finally {
+      signingIn = false;
     }
   }
 
   function signOut() {
-    return FZ.supabase.auth.signOut();
+    return FZ.authAdapter.signOut();
   }
 
   async function checkInitialSession() {
     renderLoading('Loading…');
-    const { data, error } = await FZ.supabase.auth.getSession();
+    const { data, error } = await FZ.authAdapter.getSession();
     if (error) {
       renderErrorScreen('Could not reach the authentication service. Check your connection and try again.', checkInitialSession);
       return;
@@ -297,12 +314,12 @@
     appShell = document.getElementById('appShell');
     onReadyCallback = onReady;
 
-    if (!FZ.supabase) {
-      renderErrorScreen('Could not load the app’s database client. Check your connection and reload the page.', () => window.location.reload());
+    if (!FZ.authAdapter) {
+      renderErrorScreen('Could not load the app’s data client. Check your connection and reload the page.', () => window.location.reload());
       return;
     }
 
-    FZ.supabase.auth.onAuthStateChange((event, session) => {
+    FZ.authAdapter.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         renderNewPassword();
         return;

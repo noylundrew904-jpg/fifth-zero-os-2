@@ -12,9 +12,20 @@
 </head>
 <body>
 
+<!-- ============ DEVELOPMENT MODE BANNER ============
+     Shown only when config.js has no real Supabase project configured yet
+     (see data/appMode.js) — toggled on/off in code, never removed from the
+     DOM, so it can never be mistaken for "always visible in production." -->
+<div id="devBanner" class="dev-banner" hidden>
+  <span class="dev-banner-dot"></span>
+  Development Mode — data is stored only in this browser, not connected to Supabase
+</div>
+
 <!-- ============ AUTH GATE ============
-     Shown until a real Supabase session exists; the app shell below stays
-     hidden the whole time so no module ever renders against empty data. -->
+     Shown until a session exists (from FZ.authAdapter — Supabase in
+     production, a local adapter in Development Mode); the app shell below
+     stays hidden the whole time so no module ever renders against empty
+     data. -->
 <div id="authRoot"></div>
 
 <!-- ============ APP SHELL ============ -->
@@ -35,14 +46,23 @@
 <!-- ============ SCRIPTS ============
      Plain scripts (no bundler, no ES modules) so the app runs by simply
      opening index.html — every file attaches to the shared FZ namespace.
-     Load order matters: the Supabase client and data layer first (auth +
-     storage depend on it), utils/components next, modules after,
-     script.js (bootstrap + router) last. -->
+     Load order matters: config + both adapter pairs + the mode selector
+     first (data/appMode.js picks FZ.dataAdapter/FZ.authAdapter — see that
+     file), then the data layer and utils/components, modules after,
+     script.js (bootstrap + router) last. Application code (data/storage.js,
+     components/auth.js, every module) only ever calls FZ.dataAdapter.* /
+     FZ.authAdapter.*, never Supabase directly — that indirection is what
+     makes Development Mode possible without a second code path. -->
 <!-- Vendored (not CDN-loaded) so the app has one fewer external origin to
      depend on at runtime — see vendor/README.md for the version/update. -->
 <script src="vendor/supabase-js.umd.js"></script>
 <script src="config.js"></script>
 <script src="data/supabaseClient.js"></script>
+<script src="data/adapters/supabaseDataAdapter.js"></script>
+<script src="data/adapters/mockDataAdapter.js"></script>
+<script src="data/adapters/supabaseAuthAdapter.js"></script>
+<script src="data/adapters/mockAuthAdapter.js"></script>
+<script src="data/appMode.js"></script>
 <script src="data/storage.js"></script>
 <script src="utils/id.js"></script>
 <script src="utils/format.js"></script>

@@ -200,13 +200,17 @@
 
     // Account
     const accountEmail = el('div', { class: 'detail-line' }, 'Loading account…');
-    FZ.supabase.auth.getUser().then(({ data }) => {
+    FZ.authAdapter.getUser().then(({ data }) => {
       accountEmail.textContent = 'Signed in as ' + ((data && data.user && data.user.email) || 'unknown');
     }).catch(() => { accountEmail.textContent = 'Signed in'; });
     container.appendChild(section({
       title: 'Account',
       children: el('div', { class: 'settings-actions' }, [
+        el('div', { class: 'tag-row' }, [
+          el('span', { class: 'tag' + (FZ.isDevMode ? ' tag-warning' : ' tag-success') }, FZ.isDevMode ? 'Development Mode' : 'Production'),
+        ]),
         accountEmail,
+        FZ.isDevMode ? el('div', { class: 'detail-line' }, 'Data is stored only in this browser and is not connected to Supabase.') : null,
         renderSyncStatus(),
         el('button', { class: 'btn btn-ghost', type: 'button', onclick: () => FZ.auth.signOut() }, 'Sign out'),
       ]),

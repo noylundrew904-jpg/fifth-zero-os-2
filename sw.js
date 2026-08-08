@@ -8,7 +8,7 @@
    new files instead of serving a stale cache forever.
    ========================================================================== */
 
-const CACHE_NAME = 'fz-shell-v2';
+const CACHE_NAME = 'fz-shell-v3';
 
 const APP_SHELL = [
   './',
@@ -22,6 +22,11 @@ const APP_SHELL = [
 
   'vendor/supabase-js.umd.js',
   'data/supabaseClient.js',
+  'data/adapters/supabaseDataAdapter.js',
+  'data/adapters/mockDataAdapter.js',
+  'data/adapters/supabaseAuthAdapter.js',
+  'data/adapters/mockAuthAdapter.js',
+  'data/appMode.js',
   'data/storage.js',
 
   'utils/id.js',

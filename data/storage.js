@@ -1,19 +1,21 @@
 /* ==========================================================================
-   FZ.storage — the only place in the app that touches the database. Every
-   module reads/writes through here exactly as before; only the backing
-   store changed (Supabase Postgres instead of localStorage), so module
-   code needed no changes at all.
+   FZ.storage — the only place in the app that touches persisted data.
+   Every module reads/writes through here exactly as before; the backing
+   store is whichever adapter data/appMode.js picked (FZ.dataAdapter —
+   Supabase in production, a local mock in Development Mode), so module
+   code never needed to change and never talks to either backend directly.
 
-   Design: a synchronous in-memory cache, fetched from Supabase once at
-   sign-in (FZ.storage.init), makes every read (get/list/trashed) instant
-   with no await required at any call site. Writes (set/add/update/remove/
-   softDelete/restore) update the cache immediately — the UI reacts exactly
-   as fast as it always did — then persist to Supabase in the background
-   through a small retry queue ("outbox") so a flaky connection never loses
-   a change: it just syncs a little late, with a toast if it's taking a
-   while. The outbox is the ONE thing this app still keeps in localStorage,
-   and only as a transient retry buffer — Supabase is always the source of
-   truth on the next load, never the outbox.
+   Design: a synchronous in-memory cache, fetched through the adapter once
+   at sign-in (FZ.storage.init), makes every read (get/list/trashed)
+   instant with no await required at any call site. Writes (set/add/
+   update/remove/softDelete/restore) update the cache immediately — the UI
+   reacts exactly as fast as it always did — then persist through the
+   adapter in the background via a small retry queue ("outbox") so a
+   flaky connection never loses a change: it just syncs a little late,
+   with a toast if it's taking a while. The outbox is the ONE thing this
+   app still keeps in localStorage, and only as a transient retry buffer —
+   the adapter's backing store is always the source of truth on the next
+   load, never the outbox.
    ========================================================================== */
 
 (function (FZ) {
@@ -40,7 +42,6 @@
   let syncListeners = [];
 
   function clone(value) { return JSON.parse(JSON.stringify(value)); }
-  function table(key) { return 'fz_' + key; }
   function assertKnownKey(key) { if (!ALL_KEYS.includes(key)) throw new Error(`Unknown storage key: ${key}`); }
 
   // ---- outbox (persist-retry queue) ----------------------------------------
@@ -65,26 +66,14 @@
   }
 
   async function runOp(op) {
-    const sb = FZ.supabase;
     if (op.type === 'upsert') {
-      const rows = op.rows.map((payload) => ({ id: payload.id, user_id: currentUserId, payload }));
-      const { error } = await sb.from(table(op.key)).upsert(rows, { onConflict: 'id' });
-      if (error) throw error;
+      await FZ.dataAdapter.upsertRows(op.key, currentUserId, op.rows);
     } else if (op.type === 'delete') {
-      const { error } = await sb.from(table(op.key)).delete().in('id', op.ids);
-      if (error) throw error;
+      await FZ.dataAdapter.deleteRows(op.key, currentUserId, op.ids);
     } else if (op.type === 'singleton') {
-      const { error } = await sb.from(table(op.key)).upsert([{ user_id: currentUserId, payload: op.payload }], { onConflict: 'user_id' });
-      if (error) throw error;
+      await FZ.dataAdapter.upsertSingleton(op.key, currentUserId, op.payload);
     } else if (op.type === 'eraseAll') {
-      for (const key of ARRAY_KEYS) {
-        const { error } = await sb.from(table(key)).delete().eq('user_id', currentUserId);
-        if (error) throw error;
-      }
-      for (const key of SINGLETON_KEYS) {
-        const { error } = await sb.from(table(key)).delete().eq('user_id', currentUserId);
-        if (error) throw error;
-      }
+      await FZ.dataAdapter.eraseAllForUser(currentUserId);
     }
   }
 
@@ -134,21 +123,11 @@
     await flushOutbox();
 
     const arrayFetches = ARRAY_KEYS.map(async (key) => {
-      const { data, error } = await FZ.supabase.from(table(key)).select('payload').eq('user_id', userId);
-      if (error) throw error;
-      cache[key] = (data || []).map((row) => row.payload);
+      cache[key] = await FZ.dataAdapter.fetchArray(key, userId);
     });
 
     const singletonFetches = SINGLETON_KEYS.map(async (key) => {
-      const { data, error } = await FZ.supabase.from(table(key)).select('payload').eq('user_id', userId).maybeSingle();
-      if (error) throw error;
-      if (data) {
-        cache[key] = data.payload;
-      } else {
-        cache[key] = clone(DEFAULTS[key]);
-        const { error: seedError } = await FZ.supabase.from(table(key)).upsert([{ user_id: userId, payload: cache[key] }], { onConflict: 'user_id' });
-        if (seedError) throw seedError;
-      }
+      cache[key] = await FZ.dataAdapter.fetchSingleton(key, userId, DEFAULTS[key]);
     });
 
     await Promise.all([...arrayFetches, ...singletonFetches]);
@@ -173,7 +152,7 @@
     await runOp({ type: 'eraseAll' });
     cache = clone(DEFAULTS);
     for (const key of SINGLETON_KEYS) {
-      await FZ.supabase.from(table(key)).upsert([{ user_id: currentUserId, payload: cache[key] }], { onConflict: 'user_id' });
+      await FZ.dataAdapter.upsertSingleton(key, currentUserId, cache[key]);
     }
   }
 
