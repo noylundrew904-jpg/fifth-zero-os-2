@@ -16,6 +16,8 @@
 </head>
 <body class="loading">
 
+<div class="page-transition" aria-hidden="true"></div>
+
 <!-- ============ LOADER ============ -->
 <div class="loader" id="loader" aria-hidden="true">
   <div class="loader-frames">
@@ -65,17 +67,22 @@
     <div class="hero-media">
       <div class="media-frame" data-mp4="" data-webm="" data-poster="" style="--ratio:auto;height:100%;">
         <div class="media-frame-placeholder"></div>
+        <div class="media-frame-sweep"></div>
         <video muted loop playsinline preload="none"></video>
         <div class="media-frame-scrim"></div>
       </div>
     </div>
     <div class="hero-scrim"></div>
     <div class="container hero-top-label">
-      <span class="eyebrow mono">REC · 00:00:01</span>
+      <span class="eyebrow mono">REC · <span data-timecode>00:00:00</span></span>
       <span class="eyebrow mono">ARCHIVE 001—007</span>
     </div>
     <div class="container hero-content">
-      <h1 class="hero-title">WE MAKE EVENTS<br>LOOK <em>UNFORGETTABLE.</em></h1>
+      <h1 class="hero-title">
+        <span class="line"><span class="line-inner">WE MAKE EVENTS</span></span>
+        <span class="line"><span class="line-inner">LOOK</span></span>
+        <span class="line"><span class="line-inner"><em>UNFORGETTABLE.</em></span></span>
+      </h1>
       <p class="hero-sub">Films, aftermovies and visual stories for events, brands and the people who make them happen.</p>
       <div class="hero-actions">
         <a class="btn btn-solid" href="work.html" data-cursor="VIEW FILM →">View the Work →</a>
@@ -83,6 +90,15 @@
       </div>
     </div>
     <div class="hero-scroll-cue">SCROLL</div>
+  </section>
+
+  <!-- ============ TITLE CARD ============ -->
+  <section class="title-card">
+    <span class="title-card-frame mono">Frame / 0132</span>
+    <div class="container title-card-inner">
+      <h2 class="title-card-h1 clip-reveal"><span class="clip-reveal-inner">EVENTS HAPPEN ONCE.</span></h2>
+      <h2 class="title-card-h2 clip-reveal"><span class="clip-reveal-inner">THE FEELING SHOULDN'T.</span></h2>
+    </div>
   </section>
 
   <!-- ============ THE ARCHIVE (teaser) ============ -->
@@ -95,6 +111,7 @@
         </div>
         <span class="section-tag">SCROLL TO EXPLORE →</span>
       </div>
+      <div id="archiveFeature"></div>
       <div class="archive-grid" id="archiveTeaser"></div>
       <div class="archive-cta-row">
         <a class="btn btn-outline" href="work.html" data-cursor="OPEN ARCHIVE →">View Full Archive →</a>
@@ -102,22 +119,33 @@
     </div>
   </section>
 
-  <!-- ============ WE KNOW EVENTS (manifesto) ============ -->
+  <!-- ============ WE KNOW EVENTS (manifesto / signature scrub) ============ -->
   <section class="section manifesto">
     <div class="container">
       <div class="manifesto-head reveal">
         <span class="eyebrow mono">Manifesto / 02</span>
-        <h2>WE DON'T JUST SHOOT<br>THE EVENT. WE UNDERSTAND<br>THE EVENT.</h2>
+        <h2>WE DON'T JUST SHOOT<br>THE EVENT.</h2>
       </div>
-      <div class="word-stack">
-        <span>THE BUILD.</span>
-        <span>THE ANTICIPATION.</span>
-        <span>THE REVEAL.</span>
-        <span>THE CROWD.</span>
-        <span>THE CHAOS.</span>
-        <span>THE PEOPLE.</span>
-        <span>THE AFTERMATH.</span>
+    </div>
+    <div class="manifesto-scrub" id="manifestoScrub">
+      <div class="manifesto-scrub-inner">
+        <span class="scrub-frame mono">Edit / 04</span>
+        <div class="scrub-word-viewport">
+          <span class="scrub-word">THE BUILD.</span>
+          <span class="scrub-word">THE ANTICIPATION.</span>
+          <span class="scrub-word">THE REVEAL.</span>
+          <span class="scrub-word">THE CROWD.</span>
+          <span class="scrub-word">THE CHAOS.</span>
+          <span class="scrub-word">THE PEOPLE.</span>
+          <span class="scrub-word">THE AFTERMATH.</span>
+          <span class="scrub-word is-final">WE DON'T JUST SHOOT THE EVENT.<br>WE UNDERSTAND THE EVENT.</span>
+        </div>
+        <div class="scrub-progress" aria-hidden="true">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
       </div>
+    </div>
+    <div class="container manifesto-close-wrap">
       <p class="manifesto-close reveal">We understand that the best event film isn't a documentation of what happened. <strong>It's the feeling of being there.</strong></p>
     </div>
   </section>
@@ -140,6 +168,12 @@
           <div class="capability-row"><span>Post-Production</span><span>06</span></div>
         </div>
       </div>
+      <div class="audience-marquee" aria-hidden="true">
+        <div class="audience-marquee-track">
+          <span>Event Agencies</span><span>Brands</span><span>Corporates</span><span>Production Partners</span>
+          <span>Event Agencies</span><span>Brands</span><span>Corporates</span><span>Production Partners</span>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -147,9 +181,9 @@
   <section class="section dontdo">
     <div class="container">
       <div class="dontdo-grid">
-        <div class="dontdo-col is-dont reveal">
-          <h3>Things We Don't Do.</h3>
-          <ul class="dontdo-list">
+        <div class="dontdo-col is-dont">
+          <h3 class="clip-reveal"><span class="clip-reveal-inner">Things We Don't Do.</span></h3>
+          <ul class="dontdo-list reveal-stagger">
             <li>Boring aftermovies.</li>
             <li>Generic corporate films.</li>
             <li>Slow-mo handshakes.</li>
@@ -158,9 +192,9 @@
             <li>"Synergy."</li>
           </ul>
         </div>
-        <div class="dontdo-col is-do reveal">
-          <h3>Things We Do.</h3>
-          <ul class="dontdo-list">
+        <div class="dontdo-col is-do">
+          <h3 class="clip-reveal"><span class="clip-reveal-inner">Things We Do.</span></h3>
+          <ul class="dontdo-list reveal-stagger">
             <li>Energy.</li>
             <li>Story.</li>
             <li>Attitude.</li>
@@ -216,10 +250,11 @@
           </div>
         </div>
         <div class="about-teaser-media reveal">
-          <div class="media-frame" data-mp4="" data-webm="" data-poster="">
+          <div class="media-frame" data-mp4="" data-webm="" data-poster="" data-cursor="PLAY →">
             <span class="media-frame-tag">IMAGE / REPLACE</span>
             <div class="media-frame-placeholder"></div>
             <video muted loop playsinline preload="none"></video>
+            <div class="media-frame-curtain"></div>
           </div>
         </div>
       </div>

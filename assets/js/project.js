@@ -42,17 +42,17 @@
     document.getElementById('projectResultMedia').innerHTML =
       window.REPLAY.mediaFrameHTML({
         mp4: project.media.mp4, webm: project.media.webm, poster: project.media.poster,
-        tag: 'THE RESULT'
+        tag: 'THE RESULT', cursor: 'PLAY →'
       });
 
     document.getElementById('projectFilm').innerHTML =
       window.REPLAY.mediaFrameHTML({
         mp4: project.media.mp4, webm: project.media.webm, poster: project.media.poster,
-        tag: 'THE FILM'
+        tag: 'THE FILM', sweep: true, cursor: 'PLAY →'
       });
 
     document.getElementById('projectGallery').innerHTML = project.gallery.map(function (g, i) {
-      return '<div class="reveal">' + window.REPLAY.mediaFrameHTML({ poster: g.poster, tag: 'FRAME ' + String(i + 1).padStart(4, '0') }) + '</div>';
+      return window.REPLAY.mediaFrameHTML({ poster: g.poster, tag: 'FRAME ' + String(i + 1).padStart(4, '0'), cursor: 'PLAY →' });
     }).join('');
 
     document.getElementById('projectCredits').innerHTML = project.credits.map(function (c) {
@@ -64,15 +64,7 @@
     document.getElementById('nextProjectNum').textContent = 'Next / Project ' + next.id;
 
     window.REPLAY.initMediaFrames(document);
-    if (window.REPLAY.reInitReveals) window.REPLAY.reInitReveals();
-    document.querySelectorAll('.reveal').forEach(function (el) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) { e.target.classList.add('is-visible'); io.unobserve(e.target); }
-        });
-      }, { threshold: 0.15 });
-      io.observe(el);
-    });
+    window.REPLAY.initReveals();
   }
 
   document.addEventListener('DOMContentLoaded', render);

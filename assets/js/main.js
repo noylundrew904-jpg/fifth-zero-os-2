@@ -18,13 +18,19 @@
     var tag = opts.tag || '';
     var cam = opts.cam || '';
     var scrim = opts.scrim !== false;
+    var curtain = opts.curtain !== false;
+    var sweep = !!opts.sweep;
+    var cursor = opts.cursor || '';
     return (
-      '<div class="media-frame" data-mp4="' + mp4 + '" data-webm="' + webm + '" data-poster="' + poster + '">' +
+      '<div class="media-frame" data-mp4="' + mp4 + '" data-webm="' + webm + '" data-poster="' + poster + '"' +
+        (cursor ? ' data-cursor="' + cursor + '"' : '') + '>' +
         (tag ? '<span class="media-frame-tag">' + tag + '</span>' : '') +
         (cam ? '<span class="media-frame-cam">' + cam + '</span>' : '') +
         '<div class="media-frame-placeholder"></div>' +
+        (sweep ? '<div class="media-frame-sweep"></div>' : '') +
         '<video muted loop playsinline preload="none"' + (poster ? ' poster="' + poster + '"' : '') + '></video>' +
         (scrim ? '<div class="media-frame-scrim"></div>' : '') +
+        (curtain ? '<div class="media-frame-curtain"></div>' : '') +
       '</div>'
     );
   }
@@ -39,7 +45,7 @@
       if (mp4) { var s2 = document.createElement('source'); s2.src = mp4; s2.type = 'video/mp4'; video.appendChild(s2); }
       frame.classList.add('has-video');
 
-      var isHoverPlay = frame.closest('.archive-card, .gallery-grid');
+      var isHoverPlay = frame.closest('.archive-card, .archive-feature, .gallery-grid');
       if (isHoverPlay && !isTouch) {
         var card = frame.closest('a, div');
         card.addEventListener('mouseenter', function () { video.play().catch(function () {}); });
@@ -59,6 +65,7 @@
   window.REPLAY = window.REPLAY || {};
   window.REPLAY.mediaFrameHTML = mediaFrameHTML;
   window.REPLAY.initMediaFrames = initMediaFrames;
+  window.REPLAY.initReveals = function () { initReveals(); };
 
   /* ---------------------------------------------------------------
      Custom cursor
@@ -117,16 +124,33 @@
   }
 
   /* ---------------------------------------------------------------
+     Hero entrance — film-title-style line reveal, fired once the
+     loader curtain lifts (or immediately if there's no loader).
+  --------------------------------------------------------------- */
+  function revealHero() {
+    var title = document.querySelector('.hero-title');
+    var sub = document.querySelector('.hero-sub');
+    var actions = document.querySelector('.hero-actions');
+    if (title) title.classList.add('is-revealed');
+    if (sub) sub.classList.add('is-revealed');
+    if (actions) actions.classList.add('is-revealed');
+  }
+
+  /* ---------------------------------------------------------------
      Intro loader (homepage only, once per session)
   --------------------------------------------------------------- */
   function initLoader() {
     var loader = document.getElementById('loader');
-    if (!loader) return;
+    if (!loader) {
+      revealHero();
+      return;
+    }
     var played = sessionStorage.getItem('replayIntroPlayed');
     var finish = function () {
       loader.classList.add('is-done');
       document.body.classList.remove('loading');
       sessionStorage.setItem('replayIntroPlayed', '1');
+      revealHero();
     };
     if (played || reduceMotion) {
       finish();
@@ -138,6 +162,49 @@
     loader.querySelector('.loader-skip').addEventListener('click', function () {
       clearTimeout(t);
       finish();
+    });
+  }
+
+  /* ---------------------------------------------------------------
+     Live timecode — a ticking mm:ss:cs readout, control-room detail
+  --------------------------------------------------------------- */
+  function initTimecode() {
+    if (reduceMotion) return;
+    document.querySelectorAll('[data-timecode]').forEach(function (el) {
+      var start = performance.now();
+      function tick() {
+        var elapsed = (performance.now() - start) / 1000;
+        var m = Math.floor(elapsed / 60);
+        var s = Math.floor(elapsed % 60);
+        var cs = Math.floor((elapsed * 100) % 100);
+        el.textContent = String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0') + ':' + String(cs).padStart(2, '0');
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    });
+  }
+
+  /* ---------------------------------------------------------------
+     Page transition — a cut-to-black between internal pages instead
+     of a bare browser navigation.
+  --------------------------------------------------------------- */
+  function initPageTransition() {
+    var el = document.querySelector('.page-transition');
+    if (!el) return;
+    if (reduceMotion) return;
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { el.classList.add('is-revealing'); });
+    });
+    document.querySelectorAll('a[href]').forEach(function (a) {
+      var href = a.getAttribute('href');
+      if (!href || href.charAt(0) === '#' || href.indexOf('mailto:') === 0 || href.indexOf('http') === 0 || a.target === '_blank') return;
+      a.addEventListener('click', function (e) {
+        if (e.metaKey || e.ctrlKey || e.shiftKey) return;
+        e.preventDefault();
+        el.classList.remove('is-revealing');
+        el.classList.add('is-leaving');
+        setTimeout(function () { window.location.href = href; }, 420);
+      });
     });
   }
 
@@ -176,7 +243,7 @@
      Scroll reveals
   --------------------------------------------------------------- */
   function initReveals() {
-    var els = document.querySelectorAll('.reveal, .reveal-stagger');
+    var els = document.querySelectorAll('.reveal, .reveal-stagger, .clip-reveal');
     if (!els.length) return;
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
@@ -189,20 +256,40 @@
     els.forEach(function (el) { io.observe(el); });
   }
 
-  function initWordStacks() {
-    document.querySelectorAll('.word-stack').forEach(function (stack) {
-      var words = stack.querySelectorAll('span');
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (!entry.isIntersecting) return;
-          words.forEach(function (w, i) {
-            setTimeout(function () { w.classList.add('is-visible'); }, reduceMotion ? 0 : i * 90);
-          });
-          io.unobserve(entry.target);
-        });
-      }, { threshold: 0.3 });
-      io.observe(stack);
-    });
+  /* ---------------------------------------------------------------
+     Manifesto scroll-scrub — pins the section and steps a "playhead"
+     word-by-word as the visitor scrolls, like scrubbing an edit
+     timeline. Falls back to a static stacked list under
+     prefers-reduced-motion (handled entirely in CSS).
+  --------------------------------------------------------------- */
+  function initScrub() {
+    var wrap = document.getElementById('manifestoScrub');
+    if (!wrap || reduceMotion) return;
+    var words = wrap.querySelectorAll('.scrub-word');
+    var dots = wrap.querySelectorAll('.scrub-progress i');
+    var ticking = false;
+
+    function update() {
+      ticking = false;
+      var rect = wrap.getBoundingClientRect();
+      var total = rect.height - window.innerHeight;
+      if (total <= 0) return;
+      var progress = Math.min(1, Math.max(0, -rect.top / total));
+      var idx = Math.min(words.length - 1, Math.floor(progress * words.length));
+      words.forEach(function (w, i) {
+        w.classList.toggle('is-active', i === idx);
+        w.classList.toggle('is-passed', i < idx);
+      });
+      dots.forEach(function (d, i) { d.classList.toggle('is-active', i === idx); });
+    }
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(update);
+        ticking = true;
+      }
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    update();
   }
 
   /* ---------------------------------------------------------------
@@ -220,7 +307,9 @@
   }
 
   /* ---------------------------------------------------------------
-     Archive card builder — shared by homepage teaser + work.html
+     Archive builders — shared by homepage teaser + work.html.
+     Item 001 renders as a full-bleed "feature" (film-poster style);
+     everything else drops into the asymmetric grid.
   --------------------------------------------------------------- */
   function archiveCardHTML(project) {
     var span = project.span || 6;
@@ -231,6 +320,7 @@
             mp4: project.media.mp4, webm: project.media.webm, poster: project.media.poster,
             tag: project.category, cam: (parseInt(project.id, 10) % 2 === 0) ? 'CAM B' : 'CAM A'
           }) +
+          '<span class="archive-card-ghost mono">' + project.id + '</span>' +
           '<div class="archive-card-info">' +
             '<div>' +
               '<div class="archive-card-num mono">' + project.id + '</div>' +
@@ -243,11 +333,33 @@
     );
   }
 
+  function archiveFeatureHTML(project) {
+    return (
+      '<a class="archive-feature reveal" href="project.html?slug=' + project.slug + '" data-cursor="VIEW FILM →">' +
+        mediaFrameHTML({
+          mp4: project.media.mp4, webm: project.media.webm, poster: project.media.poster,
+          tag: project.category, cam: 'CAM A', sweep: true
+        }) +
+        '<div class="archive-feature-overlay">' +
+          '<span class="archive-feature-num mono">FILM / ' + project.id + '</span>' +
+          '<h3 class="archive-feature-title">' + project.title + '</h3>' +
+          '<div class="archive-feature-meta">' + project.event + ' — ' + project.location + ' / ' + project.year + '</div>' +
+        '</div>' +
+      '</a>'
+    );
+  }
+
   function renderArchive(containerId, opts) {
     var container = document.getElementById(containerId);
     if (!container) return;
     opts = opts || {};
     var list = (window.REPLAY_PROJECTS || []).slice();
+    var featureEl = opts.featureId ? document.getElementById(opts.featureId) : null;
+    if (featureEl && list.length) {
+      featureEl.innerHTML = archiveFeatureHTML(list[0]);
+      list = list.slice(1);
+      initMediaFrames(featureEl);
+    }
     if (opts.limit) list = list.slice(0, opts.limit);
     container.innerHTML = list.map(archiveCardHTML).join('');
     initMediaFrames(container);
@@ -265,15 +377,17 @@
   }
 
   document.addEventListener('DOMContentLoaded', function () {
+    initPageTransition();
     initLoader();
     initCursor();
     initHeader();
     initMediaFrames(document);
     initReveals();
-    initWordStacks();
+    initScrub();
     initSoundToggle();
     initFooterYear();
-    if (document.getElementById('archiveTeaser')) renderArchive('archiveTeaser', { limit: 6 });
-    if (document.getElementById('workGrid')) renderArchive('workGrid');
+    initTimecode();
+    if (document.getElementById('archiveTeaser')) renderArchive('archiveTeaser', { featureId: 'archiveFeature', limit: 5 });
+    if (document.getElementById('workGrid')) renderArchive('workGrid', { featureId: 'archiveFeature' });
   });
 })();
