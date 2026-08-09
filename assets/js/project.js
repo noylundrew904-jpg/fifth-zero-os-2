@@ -58,7 +58,7 @@
 
     document.getElementById('projectNum').textContent = 'Project ' + project.id;
     document.getElementById('projectTitle').textContent = project.title;
-    document.getElementById('projectSub').textContent = project.category + ' — ' + project.client;
+    document.getElementById('projectSub').textContent = project.client ? project.category + ' — ' + project.client : project.category + ' — ' + project.event;
     document.getElementById('projectTags').innerHTML =
       '<span class="eyebrow mono">' + project.location + '</span>' +
       '<span class="eyebrow mono">' + project.year + '</span>';
