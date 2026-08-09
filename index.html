@@ -65,7 +65,7 @@
   <!-- ============ HERO ============ -->
   <section class="hero">
     <div class="hero-media">
-      <div class="media-frame" data-mp4="" data-webm="" data-poster="" style="--ratio:auto;height:100%;">
+      <div class="media-frame" id="heroMedia" data-mp4="" data-webm="" data-mp4-mobile="" data-poster="" style="--ratio:auto;height:100%;">
         <div class="media-frame-placeholder"></div>
         <div class="media-frame-sweep"></div>
         <video muted loop playsinline preload="none"></video>
@@ -75,7 +75,10 @@
     <div class="hero-scrim"></div>
     <div class="container hero-top-label">
       <span class="eyebrow mono">REC · <span data-timecode>00:00:00</span></span>
-      <span class="eyebrow mono">ARCHIVE 001—007</span>
+      <div class="hero-top-status">
+        <span class="eyebrow mono">ARCHIVE 001—007</span>
+        <span class="eyebrow mono" id="heroPlaceholderTag">Showreel / Media Required</span>
+      </div>
     </div>
     <div class="container hero-content">
       <h1 class="hero-title">

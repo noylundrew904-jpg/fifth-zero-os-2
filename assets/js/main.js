@@ -411,8 +411,28 @@
     });
   }
 
+  /* ---------------------------------------------------------------
+     Hero showreel — points the hero's media-frame at
+     window.REPLAY_SHOWREEL (see data.js) before it gets wired up by
+     initMediaFrames, so a real showreel takes over automatically the
+     moment its paths are filled in. Runs before initMediaFrames.
+  --------------------------------------------------------------- */
+  function applyShowreelConfig() {
+    var frame = document.getElementById('heroMedia');
+    if (!frame) return;
+    var reel = window.REPLAY_SHOWREEL;
+    if (!reel || (!reel.mp4 && !reel.webm)) return;
+    frame.dataset.mp4 = reel.mp4 || '';
+    frame.dataset.webm = reel.webm || '';
+    frame.dataset.mp4Mobile = reel.mp4Mobile || '';
+    if (reel.poster) frame.dataset.poster = reel.poster;
+    var tag = document.getElementById('heroPlaceholderTag');
+    if (tag) tag.remove();
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     initPageTransition();
+    applyShowreelConfig();
     initLoader();
     initCursor();
     initHeader();

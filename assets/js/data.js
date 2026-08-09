@@ -30,12 +30,41 @@
  *    that placeholder is replaced by the real file automatically.
  * ------------------------------------------------------------------
  */
+/**
+ * Homepage hero showreel — separate from individual project media.
+ * See assets/media/showreel/README.txt. Leave any field '' to keep
+ * the studio's placeholder treatment in the hero.
+ */
+window.REPLAY_SHOWREEL = {
+  mp4: '',        // assets/media/showreel/showreel.mp4
+  webm: '',       // assets/media/showreel/showreel.webm
+  mp4Mobile: '',  // assets/media/showreel/showreel-mobile.mp4
+  poster: ''      // assets/media/showreel/poster.jpg
+};
+
+/**
+ * ------------------------------------------------------------------
+ * NOTE ON THE PROJECTS BELOW: these are demo/placeholder entries that
+ * exist to prove out the layout and the copy voice — none of the
+ * clients, credits, or results are real. Before this site goes to a
+ * real event agency or client:
+ *   - replace `client` with the real client/agency name (or delete
+ *     the field to hide it)
+ *   - replace `credits` with real names, or leave the array empty —
+ *     never invent a crew member
+ *   - rewrite brief/approach/result from the actual project, not
+ *     this placeholder copy
+ * Curating for real: pick 5-7 of your strongest projects rather than
+ * publishing everything — lead with your best visual impact and
+ * strongest brand credibility, and keep the rest as supporting work.
+ * ------------------------------------------------------------------
+ */
 window.REPLAY_PROJECTS = [
   {
     id: '001',
     slug: 'ignite-summit',
     title: 'IGNITE SUMMIT',
-    client: 'Kinetic Experiential',
+    client: 'Placeholder Client',
     event: 'Global Brand Activation',
     location: 'Berlin, Germany',
     year: 2026,
@@ -55,9 +84,9 @@ window.REPLAY_PROJECTS = [
       { label: 'Footage Shot', value: '48 Hrs' },
       { label: 'Deliverables', value: '1 Film / 6 Cuts' }
     ],
-    brief: 'Kinetic needed a single film that could sell next year’s edition before this year’s stage lights were even down — something that captured scale without flattening it into another drone-and-crowd montage.',
+    brief: 'A single film that could sell next year’s edition before this year’s stage lights were even down — something that captured scale without flattening it into another drone-and-crowd montage.',
     approach: 'We ran a five-camera unit across all three days, prioritising proximity over coverage: performer eyelines, crew radios, the second before a cue lands. The edit is built on rhythm, not chronology.',
-    result: 'Delivered 48 hours after wrap. Used as the agency’s lead pitch asset for three subsequent activations.',
+    result: 'Cut and delivered inside 48 hours — the turnaround the format is actually built for.',
     gallery: [
       { image: '', alt: 'Ignite Summit — main stage wide shot' },
       { image: '', alt: 'Ignite Summit — crowd detail' },
@@ -66,18 +95,13 @@ window.REPLAY_PROJECTS = [
       { image: '', alt: 'Ignite Summit — lighting rig' },
       { image: '', alt: 'Ignite Summit — audience reaction' }
     ],
-    credits: [
-      { role: 'Creative Direction', name: 'REPLAY' },
-      { role: 'Director', name: 'S. Okafor' },
-      { role: 'DOP', name: 'M. Renard' },
-      { role: 'Edit', name: 'L. Voss' }
-    ]
+    credits: []
   },
   {
     id: '002',
     slug: 'nightshift',
     title: 'NIGHTSHIFT',
-    client: 'Bassline Collective',
+    client: 'Placeholder Client',
     event: 'Music & Culture Festival',
     location: 'Lisbon, Portugal',
     year: 2025,
@@ -94,24 +118,20 @@ window.REPLAY_PROJECTS = [
     ],
     brief: 'A festival in its fourth year, competing for the same headline slots as events ten years older. They needed a film that made the lineup feel like the least interesting part.',
     approach: 'Shot entirely handheld, entirely at night. No interviews, no branding shots on cue — the sponsors appear because they were actually there, in frame, in the crowd.',
-    result: 'Organic reach outperformed the festival’s paid campaign for the following year’s early-bird window.',
+    result: 'The kind of film people forward on their own — no paid push behind it, none needed.',
     gallery: [
       { image: '', alt: 'Nightshift — crowd at night' },
       { image: '', alt: 'Nightshift — stage lighting' },
       { image: '', alt: 'Nightshift — DJ booth' },
       { image: '', alt: 'Nightshift — festival grounds' }
     ],
-    credits: [
-      { role: 'Director', name: 'J. Park' },
-      { role: 'DOP', name: 'A. Bianchi' },
-      { role: 'Edit', name: 'L. Voss' }
-    ]
+    credits: []
   },
   {
     id: '003',
     slug: 'summit-of-things',
     title: 'SUMMIT OF THINGS',
-    client: 'Northwind Corp',
+    client: 'Placeholder Client',
     event: 'Product Launch Conference',
     location: 'Austin, USA',
     year: 2025,
@@ -128,22 +148,19 @@ window.REPLAY_PROJECTS = [
     ],
     brief: 'A corporate keynote that needed to not look like a corporate keynote — without losing a single stakeholder’s trust in the process.',
     approach: 'We treated the main stage like a concert: wide lenses, low angles, and a sound mix that leaned into the room rather than the lapel mic.',
-    result: 'Recap film opened the following year’s event to their own executive team.',
+    result: 'Proof a keynote can be cut with the energy of a live show without losing the room.',
     gallery: [
       { image: '', alt: 'Summit of Things — keynote stage' },
       { image: '', alt: 'Summit of Things — audience wide shot' },
       { image: '', alt: 'Summit of Things — speaker detail' }
     ],
-    credits: [
-      { role: 'Director', name: 'S. Okafor' },
-      { role: 'Edit', name: 'R. Nakamura' }
-    ]
+    credits: []
   },
   {
     id: '004',
     slug: 'the-drop',
     title: 'THE DROP',
-    client: 'Altitude Sportswear',
+    client: 'Placeholder Client',
     event: 'Product Reveal / Brand Activation',
     location: 'Chamonix, France',
     year: 2025,
@@ -160,21 +177,18 @@ window.REPLAY_PROJECTS = [
     ],
     brief: 'A 90-second teaser to run before the doors even opened — built from a tech scout and a promise, not a finished event.',
     approach: 'Pre-cut the rhythm before a single frame existed, then shot to the edit rather than editing to the footage.',
-    result: 'Teaser ran across the brand’s channels within six hours of the reveal ending.',
+    result: 'Cut to the beat before the beat existed — live within hours of the reveal ending.',
     gallery: [
       { image: '', alt: 'The Drop — mountain reveal' },
       { image: '', alt: 'The Drop — product detail' }
     ],
-    credits: [
-      { role: 'Director', name: 'A. Bianchi' },
-      { role: 'Edit', name: 'L. Voss' }
-    ]
+    credits: []
   },
   {
     id: '005',
     slug: 'floor-eleven',
     title: 'FLOOR ELEVEN',
-    client: 'Meridian Group',
+    client: 'Placeholder Client',
     event: 'Internal Company Gala',
     location: 'Singapore',
     year: 2024,
@@ -191,23 +205,19 @@ window.REPLAY_PROJECTS = [
     ],
     brief: 'An internal event, not a marketing asset — which meant the only audience that mattered was the room itself, a year later.',
     approach: 'We shot for recognition, not spectacle: faces, tables, the walk to the stage. The kind of detail only the people who were there will catch.',
-    result: 'Screened at the following year’s opening as the show-opener, unprompted, by the client.',
+    result: 'Built for a room of a few hundred, not a feed of a million — and it played like it.',
     gallery: [
       { image: '', alt: 'Floor Eleven — gala room wide shot' },
       { image: '', alt: 'Floor Eleven — guest table detail' },
       { image: '', alt: 'Floor Eleven — stage walk' }
     ],
-    credits: [
-      { role: 'Director', name: 'J. Park' },
-      { role: 'DOP', name: 'M. Renard' },
-      { role: 'Edit', name: 'R. Nakamura' }
-    ]
+    credits: []
   },
   {
     id: '006',
     slug: 'ground-control',
     title: 'GROUND CONTROL',
-    client: 'Orbit Live',
+    client: 'Placeholder Client',
     event: 'Multi-City Brand Tour',
     location: 'Tokyo / Seoul / Sydney',
     year: 2026,
@@ -224,7 +234,7 @@ window.REPLAY_PROJECTS = [
     ],
     brief: 'One brand, three cities, three very different crowds — and a single visual language that had to hold across all of them.',
     approach: 'A travelling two-person unit and a same-night turnaround workflow, cutting each city’s recap before the next load-in began.',
-    result: 'Content velocity became the case study — the tour’s socials outperformed the brand’s always-on channels for the quarter.',
+    result: 'The turnaround was the achievement as much as any single cut — three cities, no drop in pace.',
     gallery: [
       { image: '', alt: 'Ground Control — Tokyo leg' },
       { image: '', alt: 'Ground Control — Seoul leg' },
@@ -232,18 +242,13 @@ window.REPLAY_PROJECTS = [
       { image: '', alt: 'Ground Control — load-in' },
       { image: '', alt: 'Ground Control — crew on the move' }
     ],
-    credits: [
-      { role: 'Director', name: 'S. Okafor' },
-      { role: 'DOP', name: 'A. Bianchi' },
-      { role: 'Edit', name: 'L. Voss' },
-      { role: 'Motion', name: 'Studio Hollow' }
-    ]
+    credits: []
   },
   {
     id: '007',
     slug: 'wildhouse',
     title: 'WILDHOUSE',
-    client: 'Independent Promoters',
+    client: 'Placeholder Client',
     event: 'Warehouse Rave Series',
     location: 'Manchester, UK',
     year: 2024,
@@ -260,16 +265,13 @@ window.REPLAY_PROJECTS = [
     ],
     brief: 'No brief. An open call from a promoter who’d seen our other work and said "just go".',
     approach: 'One camera, one operator, no shot list. The film that came back is the one we point to when a client asks what "no stock music" actually looks like.',
-    result: 'Became the studio’s most-shared reel and the reason two of the agencies above found us.',
+    result: 'No brief, no client, no safety net — the kind of film only that much trust makes possible.',
     gallery: [
       { image: '', alt: 'Wildhouse — warehouse crowd' },
       { image: '', alt: 'Wildhouse — DJ set' },
       { image: '', alt: 'Wildhouse — smoke and lights' },
       { image: '', alt: 'Wildhouse — exterior queue' }
     ],
-    credits: [
-      { role: 'Director / DOP', name: 'J. Park' },
-      { role: 'Edit', name: 'R. Nakamura' }
-    ]
+    credits: []
   }
 ];
