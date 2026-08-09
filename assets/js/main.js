@@ -7,14 +7,24 @@
   /* ---------------------------------------------------------------
      Media frame: builds/wires the reusable "video placeholder" unit
      used across hero, archive cards, galleries and project pages.
-     Drop a real mp4/webm/poster into a project's `media` object in
-     data.js and this same markup starts playing real footage.
+     Drop real files into a project's `media` object in data.js (see
+     assets/media/projects/README.txt) and this same markup switches
+     from the animated placeholder to real playback automatically.
+     Never renders a broken video/image — anything missing just falls
+     back to the placeholder treatment.
   --------------------------------------------------------------- */
+  function escapeAttr(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
+
   function mediaFrameHTML(opts) {
     opts = opts || {};
     var mp4 = opts.mp4 || '';
     var webm = opts.webm || '';
+    var mp4Mobile = opts.mp4Mobile || '';
     var poster = opts.poster || '';
+    var image = opts.image || '';
+    var alt = opts.alt || '';
     var tag = opts.tag || '';
     var cam = opts.cam || '';
     var scrim = opts.scrim !== false;
@@ -22,13 +32,13 @@
     var sweep = !!opts.sweep;
     var cursor = opts.cursor || '';
     return (
-      '<div class="media-frame" data-mp4="' + mp4 + '" data-webm="' + webm + '" data-poster="' + poster + '"' +
-        (cursor ? ' data-cursor="' + cursor + '"' : '') + '>' +
+      '<div class="media-frame" data-mp4="' + escapeAttr(mp4) + '" data-webm="' + escapeAttr(webm) + '" data-mp4-mobile="' + escapeAttr(mp4Mobile) + '" data-poster="' + escapeAttr(poster) + '" data-image="' + escapeAttr(image) + '" data-alt="' + escapeAttr(alt) + '"' +
+        (cursor ? ' data-cursor="' + escapeAttr(cursor) + '"' : '') + '>' +
         (tag ? '<span class="media-frame-tag">' + tag + '</span>' : '') +
         (cam ? '<span class="media-frame-cam">' + cam + '</span>' : '') +
         '<div class="media-frame-placeholder"></div>' +
         (sweep ? '<div class="media-frame-sweep"></div>' : '') +
-        '<video muted loop playsinline preload="none"' + (poster ? ' poster="' + poster + '"' : '') + '></video>' +
+        '<video muted loop playsinline preload="none"' + (poster ? ' poster="' + escapeAttr(poster) + '"' : '') + ' aria-hidden="true"></video>' +
         (scrim ? '<div class="media-frame-scrim"></div>' : '') +
         (curtain ? '<div class="media-frame-curtain"></div>' : '') +
       '</div>'
@@ -37,12 +47,34 @@
 
   function initMediaFrames(root) {
     (root || document).querySelectorAll('.media-frame').forEach(function (frame) {
-      var mp4 = frame.dataset.mp4, webm = frame.dataset.webm;
+      if (frame.dataset.wired) return;
+      frame.dataset.wired = '1';
+      var mp4 = frame.dataset.mp4, webm = frame.dataset.webm, mp4Mobile = frame.dataset.mp4Mobile;
+      var image = frame.dataset.image;
+
+      if (image) {
+        var img = document.createElement('img');
+        img.className = 'media-frame-image';
+        img.alt = frame.dataset.alt || '';
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.addEventListener('error', function () {
+          frame.classList.remove('has-image');
+          img.remove();
+        });
+        frame.classList.add('has-image');
+        frame.insertBefore(img, frame.querySelector('.media-frame-scrim') || null);
+        img.src = image;
+        return;
+      }
+
       if (!mp4 && !webm) return;
       var video = frame.querySelector('video');
       if (!video) return;
+      if (mp4Mobile) { var s0 = document.createElement('source'); s0.src = mp4Mobile; s0.type = 'video/mp4'; s0.media = '(max-width: 640px)'; video.appendChild(s0); }
       if (webm) { var s1 = document.createElement('source'); s1.src = webm; s1.type = 'video/webm'; video.appendChild(s1); }
       if (mp4) { var s2 = document.createElement('source'); s2.src = mp4; s2.type = 'video/mp4'; video.appendChild(s2); }
+      video.addEventListener('error', function () { frame.classList.remove('has-video'); }, true);
       frame.classList.add('has-video');
 
       var isHoverPlay = frame.closest('.archive-card, .archive-feature, .gallery-grid');
@@ -66,6 +98,7 @@
   window.REPLAY.mediaFrameHTML = mediaFrameHTML;
   window.REPLAY.initMediaFrames = initMediaFrames;
   window.REPLAY.initReveals = function () { initReveals(); };
+  window.REPLAY.escapeAttr = escapeAttr;
 
   /* ---------------------------------------------------------------
      Custom cursor
@@ -129,9 +162,11 @@
   --------------------------------------------------------------- */
   function revealHero() {
     var title = document.querySelector('.hero-title');
+    var category = document.querySelector('.hero-category');
     var sub = document.querySelector('.hero-sub');
     var actions = document.querySelector('.hero-actions');
     if (title) title.classList.add('is-revealed');
+    if (category) category.classList.add('is-revealed');
     if (sub) sub.classList.add('is-revealed');
     if (actions) actions.classList.add('is-revealed');
   }

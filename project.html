@@ -6,6 +6,10 @@
 <title>Project — REPLAY</title>
 <meta name="description" content="An event film case study by REPLAY." />
 <meta name="theme-color" content="#0a0a0a" />
+<meta property="og:title" content="Project — REPLAY" />
+<meta property="og:description" content="An event film case study by REPLAY." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
 <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
 <link rel="stylesheet" href="assets/css/style.css" />
 </head>
@@ -49,57 +53,59 @@
     </div>
   </section>
 
-  <section class="container">
+  <section class="container" id="projectStatsSection">
     <div class="stat-strip" id="projectStats"></div>
   </section>
 
   <section class="container">
-    <div class="copy-block reveal">
-      <h3>The Brief</h3>
+    <div class="copy-block reveal" id="projectBriefBlock">
+      <h2>The Brief</h2>
       <p id="projectBrief"></p>
     </div>
-    <div class="copy-block reveal">
-      <h3>The Approach</h3>
+    <div class="copy-block reveal" id="projectApproachBlock">
+      <h2>The Approach</h2>
       <p id="projectApproach"></p>
     </div>
   </section>
 
-  <section class="section" style="padding-bottom:0;">
-    <div class="container">
-      <span class="eyebrow mono">The Film</span>
-      <div style="margin-top:20px;" id="projectFilm"></div>
-    </div>
-  </section>
-
-  <section class="section">
+  <section class="section" id="projectGallerySection">
     <div class="container">
       <span class="eyebrow mono">Selected Frames</span>
       <div class="gallery-grid reveal-stagger" id="projectGallery" style="margin-top:20px;"></div>
     </div>
   </section>
 
-  <section class="container">
+  <section class="container" id="projectResultBlock">
     <div class="copy-block reveal">
-      <h3>The Result</h3>
+      <h2>The Result</h2>
       <p id="projectResult"></p>
     </div>
   </section>
 
-  <section class="section" style="padding-top:0;">
+  <section class="section" style="padding-top:0;" id="projectResultMediaSection">
     <div class="container" id="projectResultMedia"></div>
   </section>
 
-  <section class="container">
+  <section class="container" id="projectCreditsBlock">
     <div class="copy-block reveal">
-      <h3>Credits</h3>
+      <h2>Credits</h2>
       <div class="capability-list" id="projectCredits" style="width:100%;"></div>
     </div>
   </section>
 
   <section class="next-project">
     <div class="container">
-      <span class="eyebrow mono" id="nextProjectNum">Next Project</span>
-      <a id="nextProjectLink" href="work.html" data-cursor="VIEW FILM →">Next Project</a>
+      <span class="eyebrow mono">More Films</span>
+      <div class="next-project-row">
+        <a id="prevProjectLink" class="next-project-link is-prev" href="work.html" data-cursor="VIEW FILM →">
+          <span class="mono">← Previous</span>
+          <span id="prevProjectTitle">—</span>
+        </a>
+        <a id="nextProjectLink" class="next-project-link is-next" href="work.html" data-cursor="VIEW FILM →">
+          <span class="mono">Next →</span>
+          <span id="nextProjectTitle">—</span>
+        </a>
+      </div>
     </div>
   </section>
 
