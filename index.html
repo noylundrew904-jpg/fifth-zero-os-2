@@ -3,47 +3,274 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Fifth Zero OS</title>
+<title>REPLAY — Event Film Studio</title>
+<meta name="description" content="REPLAY is a creative studio building event films, aftermovies and social-first content for event agencies, brands and corporate teams. Events happen once. We make them live forever." />
+<meta name="theme-color" content="#0a0a0a" />
+<meta property="og:title" content="REPLAY — Event Film Studio" />
+<meta property="og:description" content="Events happen once. We make them live forever." />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
 <link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
-<link rel="stylesheet" href="style.css" />
+<link rel="canonical" href="/" />
+<link rel="stylesheet" href="assets/css/style.css" />
 </head>
-<body>
+<body class="loading">
 
-<!-- ============ AUTH SCREEN ============ -->
-<div class="auth-wrap" id="authWrap">
-  <div class="auth-card">
-    <div class="auth-title serif">Fifth Zero OS</div>
-    <div class="auth-sub" id="authSub">Sign in to your operating system</div>
-    <form id="authForm">
-      <div class="field"><label>Email</label><input type="email" id="authEmail" required /></div>
-      <div class="field"><label>Password</label><input type="password" id="authPassword" required minlength="6" /></div>
-      <div class="error-text" id="authError"></div>
-      <button class="btn btn-primary" id="authSubmit" style="width:100%;justify-content:center;margin-top:6px;">Sign in</button>
-    </form>
-    <button class="auth-toggle" id="authToggle">Don't have an account? Sign up</button>
+<!-- ============ LOADER ============ -->
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-frames">
+    <div class="loader-frame"><span>CROWD</span></div>
+    <div class="loader-frame"><span>STAGE</span></div>
+    <div class="loader-frame"><span>LIGHTS</span></div>
+    <div class="loader-frame"><span>REVEAL</span></div>
+    <div class="loader-frame"><span>CONFETTI</span></div>
+    <div class="loader-frame"><span>WIDE SHOT</span></div>
+    <div class="loader-frame"><span>DETAIL</span></div>
   </div>
+  <div class="loader-text">
+    <div class="loader-line loader-line-1">Turn the sound up.</div>
+    <div class="loader-rec">REC</div>
+  </div>
+  <button class="loader-skip" type="button">Skip →</button>
 </div>
 
-<!-- ============ APP SHELL ============ -->
-<div class="app-shell" id="appShell">
-  <aside class="sidebar">
-    <div class="brand">
-      <img src="images/favicon.svg" alt="" />
-      <span class="brand-text">Fifth Zero</span>
-    </div>
-    <nav class="nav-list" id="navList"></nav>
-    <div class="userbox">
-      <div class="avatar" id="userAvatar">N</div>
-      <div class="userbox-email" id="userEmail"></div>
-      <button class="signout" id="signOutBtn">Sign out</button>
-    </div>
-  </aside>
-  <main class="main"><div class="page" id="pageRoot"></div></main>
-</div>
+<!-- ============ NAV ============ -->
+<header class="site-header">
+  <a class="brand" href="index.html">REPLAY<span class="brand-dot">.</span></a>
+  <nav class="nav-primary" aria-label="Primary">
+    <a href="work.html">Work</a>
+    <a href="about.html">About</a>
+    <a href="services.html">Services</a>
+    <a href="index.html#contact">Contact</a>
+  </nav>
+  <div class="nav-meta mono"><span class="dot-live"></span>STUDIO / 01</div>
+  <a class="nav-cta" href="index.html#contact">Start a Project →</a>
+  <button class="nav-burger" aria-label="Open menu" aria-expanded="false"><span></span></button>
+</header>
+<nav class="mobile-nav" aria-label="Mobile">
+  <a href="work.html">Work</a>
+  <a href="about.html">About</a>
+  <a href="services.html">Services</a>
+  <a href="index.html#contact">Contact</a>
+  <div class="mobile-nav-meta mono">
+    <span>hello@replay.studio</span>
+    <span>Based worldwide / on location</span>
+  </div>
+</nav>
 
-<!-- Supabase JS client (UMD build via CDN) -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="script.js"></script>
+<main id="main">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="hero-media">
+      <div class="media-frame" data-mp4="" data-webm="" data-poster="" style="--ratio:auto;height:100%;">
+        <div class="media-frame-placeholder"></div>
+        <video muted loop playsinline preload="none"></video>
+        <div class="media-frame-scrim"></div>
+      </div>
+    </div>
+    <div class="hero-scrim"></div>
+    <div class="container hero-top-label">
+      <span class="eyebrow mono">REC · 00:00:01</span>
+      <span class="eyebrow mono">ARCHIVE 001—007</span>
+    </div>
+    <div class="container hero-content">
+      <h1 class="hero-title">WE MAKE EVENTS<br>LOOK <em>UNFORGETTABLE.</em></h1>
+      <p class="hero-sub">Films, aftermovies and visual stories for events, brands and the people who make them happen.</p>
+      <div class="hero-actions">
+        <a class="btn btn-solid" href="work.html" data-cursor="VIEW FILM →">View the Work →</a>
+        <a class="btn btn-outline" href="index.html#contact" data-cursor="LET'S TALK →">Work with Us →</a>
+      </div>
+    </div>
+    <div class="hero-scroll-cue">SCROLL</div>
+  </section>
+
+  <!-- ============ THE ARCHIVE (teaser) ============ -->
+  <section class="section" id="work">
+    <div class="container">
+      <div class="section-head reveal">
+        <div>
+          <span class="eyebrow mono">Selected Event Films / 2024—2026</span>
+          <h2>THE ARCHIVE</h2>
+        </div>
+        <span class="section-tag">SCROLL TO EXPLORE →</span>
+      </div>
+      <div class="archive-grid" id="archiveTeaser"></div>
+      <div class="archive-cta-row">
+        <a class="btn btn-outline" href="work.html" data-cursor="OPEN ARCHIVE →">View Full Archive →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ WE KNOW EVENTS (manifesto) ============ -->
+  <section class="section manifesto">
+    <div class="container">
+      <div class="manifesto-head reveal">
+        <span class="eyebrow mono">Manifesto / 02</span>
+        <h2>WE DON'T JUST SHOOT<br>THE EVENT. WE UNDERSTAND<br>THE EVENT.</h2>
+      </div>
+      <div class="word-stack">
+        <span>THE BUILD.</span>
+        <span>THE ANTICIPATION.</span>
+        <span>THE REVEAL.</span>
+        <span>THE CROWD.</span>
+        <span>THE CHAOS.</span>
+        <span>THE PEOPLE.</span>
+        <span>THE AFTERMATH.</span>
+      </div>
+      <p class="manifesto-close reveal">We understand that the best event film isn't a documentation of what happened. <strong>It's the feeling of being there.</strong></p>
+    </div>
+  </section>
+
+  <!-- ============ AGENCY PARTNERSHIP ============ -->
+  <section class="section agency">
+    <div class="container">
+      <div class="agency-grid">
+        <div class="agency-copy reveal">
+          <span class="eyebrow mono">For Event &amp; Experiential Agencies</span>
+          <h2>YOU BUILD THE EVENT.<br>WE BUILD THE FILM.</h2>
+          <p>Your team creates the experience. We turn it into something people remember — working as an extension of your creative and production team, not a vendor bolted on at the end.</p>
+        </div>
+        <div class="capability-list reveal-stagger">
+          <div class="capability-row"><span>Creative Partner</span><span>01</span></div>
+          <div class="capability-row"><span>Production Support</span><span>02</span></div>
+          <div class="capability-row"><span>Event Film</span><span>03</span></div>
+          <div class="capability-row"><span>Aftermovie</span><span>04</span></div>
+          <div class="capability-row"><span>Social Content</span><span>05</span></div>
+          <div class="capability-row"><span>Post-Production</span><span>06</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ THINGS WE DON'T DO ============ -->
+  <section class="section dontdo">
+    <div class="container">
+      <div class="dontdo-grid">
+        <div class="dontdo-col is-dont reveal">
+          <h3>Things We Don't Do.</h3>
+          <ul class="dontdo-list">
+            <li>Boring aftermovies.</li>
+            <li>Generic corporate films.</li>
+            <li>Slow-mo handshakes.</li>
+            <li>Stock music.</li>
+            <li>The same shot every other event film has.</li>
+            <li>"Synergy."</li>
+          </ul>
+        </div>
+        <div class="dontdo-col is-do reveal">
+          <h3>Things We Do.</h3>
+          <ul class="dontdo-list">
+            <li>Energy.</li>
+            <li>Story.</li>
+            <li>Attitude.</li>
+            <li>Craft.</li>
+            <li>Films people actually want to watch.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SERVICES ============ -->
+  <section class="section" id="services-teaser">
+    <div class="container">
+      <div class="section-head reveal">
+        <div>
+          <span class="eyebrow mono">What We Make</span>
+          <h2>SERVICES</h2>
+        </div>
+        <span class="section-tag"><a href="services.html" data-cursor="MORE →">FULL BREAKDOWN →</a></span>
+      </div>
+      <div class="services-list reveal-stagger">
+        <div class="service-row">
+          <span class="service-num mono">01</span>
+          <div><div class="service-title">Event Films</div><p class="service-desc">Cinematic films built around the energy, scale and personality of an event.</p></div>
+        </div>
+        <div class="service-row">
+          <span class="service-num mono">02</span>
+          <div><div class="service-title">Aftermovies</div><p class="service-desc">Fast, emotional, high-impact films designed to make people wish they were there.</p></div>
+        </div>
+        <div class="service-row">
+          <span class="service-num mono">03</span>
+          <div><div class="service-title">Event Content</div><p class="service-desc">Short-form films, teasers, social cuts, recaps and content that keep the event alive after it ends.</p></div>
+        </div>
+        <div class="service-row">
+          <span class="service-num mono">04</span>
+          <div><div class="service-title">Creative Direction</div><p class="service-desc">Creative thinking, storytelling and visual direction for event films and content.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ABOUT TEASER ============ -->
+  <section class="section" id="about-teaser">
+    <div class="container">
+      <div class="about-teaser-grid">
+        <div class="about-teaser-copy reveal">
+          <span class="eyebrow mono">Studio / 03</span>
+          <h2>EVENTS ARE TEMPORARY.<br>THE FEELING SHOULDN'T BE.</h2>
+          <p>We work with event agencies, brands and corporate teams to transform live experiences into films people want to watch, share and remember.</p>
+          <div class="hero-actions" style="margin-top:28px;">
+            <a class="btn btn-outline" href="about.html" data-cursor="MORE →">The People Behind the Camera →</a>
+          </div>
+        </div>
+        <div class="about-teaser-media reveal">
+          <div class="media-frame" data-mp4="" data-webm="" data-poster="">
+            <span class="media-frame-tag">IMAGE / REPLACE</span>
+            <div class="media-frame-placeholder"></div>
+            <video muted loop playsinline preload="none"></video>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA / CONTACT ============ -->
+  <section class="final-cta" id="contact">
+    <div class="container">
+      <span class="eyebrow mono">Got an Event?</span>
+      <h2>LET'S MAKE SOMETHING<br><a href="mailto:hello@replay.studio" data-cursor="LET'S TALK →">WORTH REPLAYING.</a></h2>
+      <div class="final-cta-actions">
+        <a class="btn btn-solid" href="mailto:hello@replay.studio" data-cursor="LET'S TALK →">Start a Project →</a>
+        <a class="btn btn-outline" href="mailto:hello@replay.studio?subject=Event%20Brief">Send Us the Brief →</a>
+      </div>
+      <div class="audience-row">
+        <span>Event Agencies</span>
+        <span>Brands</span>
+        <span>Corporates</span>
+        <span>Production Partners</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<button class="sound-toggle" type="button" aria-pressed="false">
+  <span class="bars"><i></i><i></i><i></i></span>
+  <span class="label">SOUND OFF</span>
+</button>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">REPLAY<span style="color:var(--accent);">.</span></div>
+      <div class="footer-links">
+        <a href="work.html">Work</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="mailto:hello@replay.studio">hello@replay.studio</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span data-year></span> REPLAY Studio. All films, all rights reserved.</span>
+      <span>Based worldwide / on location</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
 </body>
 </html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>The Archive — REPLAY</title>
+<meta name="description" content="Selected event films, aftermovies and recap films by REPLAY — 2024 to 2026." />
+<meta name="theme-color" content="#0a0a0a" />
+<link rel="icon" type="image/svg+xml" href="images/favicon.svg" />
+<link rel="canonical" href="/work.html" />
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+
+<header class="site-header is-scrolled">
+  <a class="brand" href="index.html">REPLAY<span class="brand-dot">.</span></a>
+  <nav class="nav-primary" aria-label="Primary">
+    <a href="work.html" aria-current="page">Work</a>
+    <a href="about.html">About</a>
+    <a href="services.html">Services</a>
+    <a href="index.html#contact">Contact</a>
+  </nav>
+  <div class="nav-meta mono"><span class="dot-live"></span>ARCHIVE</div>
+  <a class="nav-cta" href="index.html#contact">Start a Project →</a>
+  <button class="nav-burger" aria-label="Open menu" aria-expanded="false"><span></span></button>
+</header>
+<nav class="mobile-nav" aria-label="Mobile">
+  <a href="work.html">Work</a>
+  <a href="about.html">About</a>
+  <a href="services.html">Services</a>
+  <a href="index.html#contact">Contact</a>
+  <div class="mobile-nav-meta mono">
+    <span>hello@replay.studio</span>
+    <span>Based worldwide / on location</span>
+  </div>
+</nav>
+
+<main id="main">
+  <section class="page-hero">
+    <div class="container">
+      <span class="eyebrow mono">Selected Event Films / 2024—2026</span>
+      <h1>THE ARCHIVE</h1>
+      <div class="page-hero-meta">
+        <p style="max-width:44ch;color:rgba(245,242,234,.7);font-size:var(--body-lg);">Every project below started as three days, a weekend, or a single night that only happened once.</p>
+        <span class="section-tag" id="archiveCount"></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:0;">
+    <div class="container">
+      <div class="archive-grid" id="workGrid"></div>
+    </div>
+  </section>
+</main>
+
+<button class="sound-toggle" type="button" aria-pressed="false">
+  <span class="bars"><i></i><i></i><i></i></span>
+  <span class="label">SOUND OFF</span>
+</button>
+
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">REPLAY<span style="color:var(--accent);">.</span></div>
+      <div class="footer-links">
+        <a href="work.html">Work</a>
+        <a href="about.html">About</a>
+        <a href="services.html">Services</a>
+        <a href="index.html#contact">Contact</a>
+        <a href="mailto:hello@replay.studio">hello@replay.studio</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span data-year></span> REPLAY Studio. All films, all rights reserved.</span>
+      <span>Based worldwide / on location</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/main.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var count = (window.REPLAY_PROJECTS || []).length;
+    document.getElementById('archiveCount').textContent = 'ARCHIVE 001—' + String(count).padStart(3, '0');
+  });
+</script>
+</body>
+</html>
