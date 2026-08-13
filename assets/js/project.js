@@ -57,7 +57,9 @@
       });
 
     document.getElementById('projectNum').textContent = 'Project ' + project.id;
-    document.getElementById('projectTitle').textContent = project.title;
+    var titleEl = document.getElementById('projectTitle');
+    titleEl.textContent = project.title;
+    window.REPLAY.fitTextLine(titleEl);
     document.getElementById('projectSub').textContent = project.client ? project.category + ' — ' + project.client : project.category + ' — ' + project.event;
     document.getElementById('projectTags').innerHTML =
       '<span class="eyebrow mono">' + project.location + '</span>' +

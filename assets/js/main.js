@@ -172,6 +172,53 @@
   }
 
   /* ---------------------------------------------------------------
+     Hero title fit — a headline word with no spaces (e.g.
+     "UNFORGETTABLE.") can't wrap, so at some viewport widths it's
+     wider than its line and gets clipped by the reveal wrapper's
+     overflow:hidden. Multi-word lines are left alone — they wrap
+     safely on their own. This measures the actual rendered width of
+     any single-token line and shrinks just that line's font-size
+     enough to always fit, however wide the word or narrow the
+     screen. Re-runs once the real webfont swaps in and on resize.
+  --------------------------------------------------------------- */
+  function fitTextLine(el) {
+    if (!el) return;
+    var available = el.parentElement ? el.parentElement.clientWidth : 0;
+    if (!available) return;
+    el.style.fontSize = '';
+    var cs = getComputedStyle(el);
+    var full = parseFloat(cs.fontSize);
+    if (!full) return;
+    var canvas = fitTextLine._canvas || (fitTextLine._canvas = document.createElement('canvas'));
+    var ctx = canvas.getContext('2d');
+    ctx.font = cs.fontStyle + ' ' + cs.fontWeight + ' ' + full + 'px ' + cs.fontFamily;
+    var width = ctx.measureText(el.textContent).width;
+    if (width > available) {
+      el.style.fontSize = (full * (available / width) * 0.98) + 'px';
+    }
+  }
+
+  function initHeroTitleFit() {
+    var targets = [];
+    document.querySelectorAll('.hero-title .line-inner').forEach(function (el) {
+      if (!/\s/.test(el.textContent.trim())) targets.push(el);
+    });
+    var projectTitle = document.querySelector('.project-hero-title');
+    if (projectTitle && !/\s/.test(projectTitle.textContent.trim())) targets.push(projectTitle);
+    if (!targets.length) return;
+
+    function fitAll() { targets.forEach(fitTextLine); }
+    fitAll();
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
+    var resizeTimer;
+    window.addEventListener('resize', function () {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(fitAll, 120);
+    });
+  }
+  window.REPLAY.fitTextLine = fitTextLine;
+
+  /* ---------------------------------------------------------------
      Intro loader (homepage only, once per session)
   --------------------------------------------------------------- */
   function initLoader() {
@@ -438,6 +485,7 @@
     initHeader();
     initMediaFrames(document);
     initReveals();
+    initHeroTitleFit();
     initScrub();
     initSoundToggle();
     initFooterYear();
