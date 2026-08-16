@@ -863,14 +863,6 @@ section{position:relative;}
 .not-found .btn{margin-top:clamp(28px,4vw,40px);}
 
 /* ============================== ABOUT PAGE ============================== */
-.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2.4vw,28px);}
-.team-card .media-frame{--ratio:3/4;}
-.team-card-info{margin-top:14px;}
-.team-name{font-family:var(--ff-display);font-weight:700;text-transform:uppercase;font-size:1.15rem;}
-.team-role{font-family:var(--ff-mono);font-size:.7rem;letter-spacing:.08em;color:var(--line-strong);text-transform:uppercase;margin-top:4px;}
-@media (max-width:760px){.team-grid{grid-template-columns:repeat(2,1fr);}}
-@media (max-width:480px){.team-grid{grid-template-columns:1fr 1fr;}}
-
 .stat-band{
   display:grid;grid-template-columns:repeat(4,1fr);
   border-top:1px solid var(--line);border-bottom:1px solid var(--line);

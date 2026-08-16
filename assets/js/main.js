@@ -339,6 +339,56 @@
   }
 
   /* ---------------------------------------------------------------
+     Stat counters — animates a [data-count] element from 0 up to its
+     target value once scrolled into view, e.g. the about page's
+     "Events Filmed / Countries / Frames Cut" stat band. Values with
+     [data-no-animate] (a single fact like a founding year, not a
+     running total) just render as-is instead of counting up.
+  --------------------------------------------------------------- */
+  function initCounters() {
+    var els = document.querySelectorAll('[data-count]');
+    if (!els.length) return;
+    var compactFormatter = (window.Intl && Intl.NumberFormat)
+      ? new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 })
+      : null;
+
+    function format(el, value) {
+      if (el.hasAttribute('data-compact') && compactFormatter) return compactFormatter.format(value);
+      return String(Math.round(value));
+    }
+
+    function animateCount(el) {
+      var target = parseFloat(el.getAttribute('data-count'));
+      var suffix = el.getAttribute('data-suffix') || '';
+      if (!isFinite(target)) return;
+      if (reduceMotion || el.hasAttribute('data-no-animate')) {
+        el.textContent = format(el, target) + suffix;
+        return;
+      }
+      var duration = 1600;
+      var start = null;
+      function step(ts) {
+        if (start === null) start = ts;
+        var progress = Math.min(1, (ts - start) / duration);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = format(el, target * eased) + suffix;
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          animateCount(entry.target);
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.4 });
+    els.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---------------------------------------------------------------
      Manifesto scroll-scrub — pins the section and steps a "playhead"
      word-by-word as the visitor scrolls, like scrubbing an edit
      timeline. Falls back to a static stacked list under
@@ -485,6 +535,7 @@
     initHeader();
     initMediaFrames(document);
     initReveals();
+    initCounters();
     initHeroTitleFit();
     initScrub();
     initSoundToggle();
