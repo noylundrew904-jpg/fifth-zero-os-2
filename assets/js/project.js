@@ -62,14 +62,14 @@
     window.FZ.fitTextLine(titleEl);
     document.getElementById('projectSub').textContent = project.client ? project.category + ' — ' + project.client : project.category + ' — ' + project.event;
     document.getElementById('projectTags').innerHTML =
-      '<span class="eyebrow mono">' + project.location + '</span>' +
-      '<span class="eyebrow mono">' + project.year + '</span>';
+      '<span class="eyebrow mono">' + escapeHtml(project.location) + '</span>' +
+      '<span class="eyebrow mono">' + escapeHtml(project.year) + '</span>';
 
     var hasStats = project.stats && project.stats.length;
     show('projectStatsSection', hasStats);
     if (hasStats) {
       document.getElementById('projectStats').innerHTML = project.stats.map(function (s) {
-        return '<div><div class="stat-value">' + s.value + '</div><div class="stat-label mono">' + s.label + '</div></div>';
+        return '<div><div class="stat-value">' + escapeHtml(s.value) + '</div><div class="stat-label mono">' + escapeHtml(s.label) + '</div></div>';
       }).join('');
     }
 
@@ -107,7 +107,7 @@
     show('projectCreditsBlock', hasCredits);
     if (hasCredits) {
       document.getElementById('projectCredits').innerHTML = project.credits.map(function (c) {
-        return '<div class="capability-row"><span>' + c.role + '</span><span>' + c.name + '</span></div>';
+        return '<div class="capability-row"><span>' + escapeHtml(c.role) + '</span><span>' + escapeHtml(c.name) + '</span></div>';
       }).join('');
     }
 

@@ -17,6 +17,14 @@
     return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
   }
 
+  /* Escapes text before it's concatenated into an innerHTML template.
+     Every value below currently comes from the studio's own static
+     data.js, never from a URL/query param — this is defense-in-depth
+     so that stays true even as content is edited over time. */
+  function escapeHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
   function mediaFrameHTML(opts) {
     opts = opts || {};
     var mp4 = opts.mp4 || '';
@@ -34,8 +42,8 @@
     return (
       '<div class="media-frame" data-mp4="' + escapeAttr(mp4) + '" data-webm="' + escapeAttr(webm) + '" data-mp4-mobile="' + escapeAttr(mp4Mobile) + '" data-poster="' + escapeAttr(poster) + '" data-image="' + escapeAttr(image) + '" data-alt="' + escapeAttr(alt) + '"' +
         (cursor ? ' data-cursor="' + escapeAttr(cursor) + '"' : '') + '>' +
-        (tag ? '<span class="media-frame-tag">' + tag + '</span>' : '') +
-        (cam ? '<span class="media-frame-cam">' + cam + '</span>' : '') +
+        (tag ? '<span class="media-frame-tag">' + escapeHtml(tag) + '</span>' : '') +
+        (cam ? '<span class="media-frame-cam">' + escapeHtml(cam) + '</span>' : '') +
         '<div class="media-frame-placeholder"></div>' +
         (sweep ? '<div class="media-frame-sweep"></div>' : '') +
         '<video muted loop playsinline preload="none"' + (poster ? ' poster="' + escapeAttr(poster) + '"' : '') + ' aria-hidden="true"></video>' +
@@ -99,6 +107,7 @@
   window.FZ.initMediaFrames = initMediaFrames;
   window.FZ.initReveals = function () { initReveals(); };
   window.FZ.escapeAttr = escapeAttr;
+  window.FZ.escapeHtml = escapeHtml;
 
   /* ---------------------------------------------------------------
      Custom cursor
@@ -447,18 +456,18 @@
     var span = project.span || 6;
     return (
       '<div class="archive-item reveal" data-span="' + span + '" data-vertical="' + !!project.vertical + '">' +
-        '<a class="archive-card" href="project.html?slug=' + project.slug + '" data-cursor="VIEW FILM →">' +
+        '<a class="archive-card" href="project.html?slug=' + escapeAttr(project.slug) + '" data-cursor="VIEW FILM →">' +
           mediaFrameHTML({
             mp4: project.media.mp4, webm: project.media.webm, poster: project.media.poster,
             tag: project.category, cam: (parseInt(project.id, 10) % 2 === 0) ? 'CAM B' : 'CAM A'
           }) +
-          '<span class="archive-card-ghost mono">' + project.id + '</span>' +
+          '<span class="archive-card-ghost mono">' + escapeHtml(project.id) + '</span>' +
           '<div class="archive-card-info">' +
             '<div>' +
-              '<div class="archive-card-num mono">' + project.id + '</div>' +
-              '<div class="archive-card-title">' + project.title + '</div>' +
+              '<div class="archive-card-num mono">' + escapeHtml(project.id) + '</div>' +
+              '<div class="archive-card-title">' + escapeHtml(project.title) + '</div>' +
             '</div>' +
-            '<div class="archive-card-meta">' + project.event + '<br>' + project.location + ' / ' + project.year + '</div>' +
+            '<div class="archive-card-meta">' + escapeHtml(project.event) + '<br>' + escapeHtml(project.location) + ' / ' + escapeHtml(project.year) + '</div>' +
           '</div>' +
         '</a>' +
       '</div>'
@@ -467,15 +476,15 @@
 
   function archiveFeatureHTML(project) {
     return (
-      '<a class="archive-feature reveal" href="project.html?slug=' + project.slug + '" data-cursor="VIEW FILM →">' +
+      '<a class="archive-feature reveal" href="project.html?slug=' + escapeAttr(project.slug) + '" data-cursor="VIEW FILM →">' +
         mediaFrameHTML({
           mp4: project.media.mp4, webm: project.media.webm, poster: project.media.poster,
           tag: project.category, cam: 'CAM A', sweep: true
         }) +
         '<div class="archive-feature-overlay">' +
-          '<span class="archive-feature-num mono">FILM / ' + project.id + '</span>' +
-          '<h3 class="archive-feature-title">' + project.title + '</h3>' +
-          '<div class="archive-feature-meta">' + project.event + ' — ' + project.location + ' / ' + project.year + '</div>' +
+          '<span class="archive-feature-num mono">FILM / ' + escapeHtml(project.id) + '</span>' +
+          '<h3 class="archive-feature-title">' + escapeHtml(project.title) + '</h3>' +
+          '<div class="archive-feature-meta">' + escapeHtml(project.event) + ' — ' + escapeHtml(project.location) + ' / ' + escapeHtml(project.year) + '</div>' +
         '</div>' +
       '</a>'
     );
