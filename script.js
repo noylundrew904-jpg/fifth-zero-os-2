@@ -193,7 +193,7 @@ async function loadProjectList() {
       <div class="list-item-main">
         <div class="card-title">${escapeHtml(p.name)}</div><div class="card-sub">${escapeHtml(p.client || '')}</div>
         ${p.next_task ? `<div class="card-sub" style="margin-top:4px;">${escapeHtml(p.next_task)}</div>` : ''}
-        <div style="height:3px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:8px;overflow:hidden;"><div style="height:100%;width:${p.progress}%;background:var(--accent);"></div></div>
+        <div style="height:3px;background:rgba(255,255,255,0.08);border-radius:3px;margin-top:8px;overflow:hidden;"><div style="height:100%;width:${p.progress}%;background:var(--white);"></div></div>
       </div>
       <span class="card-sub">${escapeHtml(p.deadline || '')}</span>
       <button class="icon-btn" data-edit="${p.id}" title="Edit">✎</button>
@@ -256,7 +256,7 @@ async function loadClientList() {
     data.map(c => `<div class="list-item">
       <div class="list-item-main"><div class="card-title">${escapeHtml(c.name)} ${c.org ? `<span class="card-sub">· ${escapeHtml(c.org)}</span>` : ''}</div>
       ${c.note ? `<div class="card-sub" style="margin-top:2px;">${escapeHtml(c.note)}</div>` : ''}</div>
-      <span class="badge ${c.tag === 'HOT' ? 'badge-danger' : c.tag === 'WARM' ? 'badge-warn' : 'badge-muted'}">${c.tag}</span>
+      <span class="badge ${c.tag === 'HOT' ? 'badge-urgent' : c.tag === 'WARM' ? '' : 'badge-muted'}">${c.tag}</span>
       <button class="icon-btn" data-edit="${c.id}" title="Edit">✎</button>
       <button class="icon-btn" data-del="${c.id}" title="Delete">✕</button>
     </div>`).join('');
@@ -316,12 +316,12 @@ async function loadInvoiceList() {
   totalsEl.innerHTML = `
     <div class="card"><div class="card-sub">Outstanding</div><div class="card-value">$${outstanding.toLocaleString()}</div></div>
     <div class="card"><div class="card-sub">Paid</div><div class="card-value">$${paid.toLocaleString()}</div></div>
-    <div class="card"><div class="card-sub">Overdue</div><div class="card-value" style="color:var(--danger);">$${overdue.toLocaleString()}</div></div>`;
+    <div class="card"><div class="card-sub" style="display:flex;align-items:center;gap:5px;"><span class="dot"></span>Overdue</div><div class="card-value">$${overdue.toLocaleString()}</div></div>`;
   listEl.innerHTML = data.length === 0 ? `<div class="empty">No invoices yet.</div>` :
     data.map(inv => `<div class="list-item">
       <div class="list-item-main"><div class="card-title">${escapeHtml(inv.client)}</div><div class="card-sub">Due ${inv.due_date || '—'}</div></div>
       <span>$${Number(inv.amount).toLocaleString()}</span>
-      <span class="badge ${inv.status === 'overdue' ? 'badge-danger' : inv.status === 'paid' ? 'badge-accent' : 'badge-muted'}">${inv.status}</span>
+      <span class="badge ${inv.status === 'overdue' ? 'badge-urgent' : inv.status === 'paid' ? 'badge-filled' : ''}">${inv.status}</span>
       ${inv.status !== 'paid' ? `<button class="icon-btn" data-paid="${inv.id}" title="Mark paid">✓</button>` : ''}
       <button class="icon-btn" data-edit="${inv.id}" title="Edit">✎</button>
       <button class="icon-btn" data-del="${inv.id}" title="Delete">✕</button>
@@ -337,8 +337,8 @@ async function loadInvoiceList() {
 async function renderJournalPage() {
   root().innerHTML = `
     ${pageHeader('Journal', 'Reflection space, saved to your account')}
-    <form class="form-card" id="journalForm">
-      <textarea id="journalContent" rows="3" placeholder="Write today's entry…" style="width:100%;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:8px;padding:10px;font-size:12.5px;"></textarea>
+    <form class="form-card surface-light" id="journalForm">
+      <textarea id="journalContent" rows="3" placeholder="Write today's entry…" style="width:100%;background:rgba(10,10,10,0.03);border:1px solid var(--border-on-light);border-radius:6px;padding:10px;font-family:var(--font-body);font-size:13px;color:var(--black);"></textarea>
       <div class="error-text" id="journalError"></div>
       <div style="display:flex;justify-content:flex-end;margin-top:8px;"><button class="btn btn-primary">Save entry</button></div>
     </form>
@@ -359,8 +359,8 @@ async function loadJournalList() {
   const el = document.getElementById('journalList');
   if (error) { el.innerHTML = `<div class="error-text">${error.message}</div>`; return; }
   el.innerHTML = data.length === 0 ? `<div class="empty">No entries yet.</div>` :
-    data.map(j => `<div class="list-item" style="align-items:flex-start;">
-      <div class="list-item-main"><div class="card-sub" style="margin-bottom:4px;">${new Date(j.created_at).toLocaleDateString()}</div><div style="font-size:12.5px;color:#ddd;">${escapeHtml(j.content)}</div></div>
+    data.map(j => `<div class="list-item surface-light" style="align-items:flex-start;">
+      <div class="list-item-main"><div class="card-sub" style="margin-bottom:4px;">${new Date(j.created_at).toLocaleDateString()}</div><div style="font-family:var(--font-body);font-size:13px;color:var(--black);">${escapeHtml(j.content)}</div></div>
       <button class="icon-btn" data-del="${j.id}" title="Delete">✕</button>
     </div>`).join('');
   el.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', async () => { if (confirm('Delete this entry?')) { await db.from('journal_entries').delete().eq('id', b.dataset.del); loadJournalList(); } }));
