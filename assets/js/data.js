@@ -1,5 +1,5 @@
 /**
- * REPLAY — project data.
+ * Fifth & Zero — project data.
  * Single source of truth for the archive, the homepage teaser and the
  * case-study template. Add a new event film by appending an object here —
  * no other file needs to change, and the layout code never needs to touch
@@ -35,7 +35,7 @@
  * See assets/media/showreel/README.txt. Leave any field '' to keep
  * the studio's placeholder treatment in the hero.
  */
-window.REPLAY_SHOWREEL = {
+window.FZ_SHOWREEL = {
   mp4: '',        // assets/media/showreel/showreel.mp4
   webm: '',       // assets/media/showreel/showreel.webm
   mp4Mobile: '',  // assets/media/showreel/showreel-mobile.mp4
@@ -56,7 +56,7 @@ window.REPLAY_SHOWREEL = {
  * business impact) for placeholder content.
  * ------------------------------------------------------------------
  */
-window.REPLAY_PROJECTS = [
+window.FZ_PROJECTS = [
   {
     id: '001',
     slug: 'the-reveal',

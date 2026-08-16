@@ -94,11 +94,11 @@
     });
   }
 
-  window.REPLAY = window.REPLAY || {};
-  window.REPLAY.mediaFrameHTML = mediaFrameHTML;
-  window.REPLAY.initMediaFrames = initMediaFrames;
-  window.REPLAY.initReveals = function () { initReveals(); };
-  window.REPLAY.escapeAttr = escapeAttr;
+  window.FZ = window.FZ || {};
+  window.FZ.mediaFrameHTML = mediaFrameHTML;
+  window.FZ.initMediaFrames = initMediaFrames;
+  window.FZ.initReveals = function () { initReveals(); };
+  window.FZ.escapeAttr = escapeAttr;
 
   /* ---------------------------------------------------------------
      Custom cursor
@@ -216,7 +216,7 @@
       resizeTimer = setTimeout(fitAll, 120);
     });
   }
-  window.REPLAY.fitTextLine = fitTextLine;
+  window.FZ.fitTextLine = fitTextLine;
 
   /* ---------------------------------------------------------------
      Intro loader (homepage only, once per session)
@@ -227,11 +227,11 @@
       revealHero();
       return;
     }
-    var played = sessionStorage.getItem('replayIntroPlayed');
+    var played = sessionStorage.getItem('fzIntroPlayed');
     var finish = function () {
       loader.classList.add('is-done');
       document.body.classList.remove('loading');
-      sessionStorage.setItem('replayIntroPlayed', '1');
+      sessionStorage.setItem('fzIntroPlayed', '1');
       revealHero();
     };
     if (played || reduceMotion) {
@@ -435,7 +435,7 @@
     var container = document.getElementById(containerId);
     if (!container) return;
     opts = opts || {};
-    var list = (window.REPLAY_PROJECTS || []).slice();
+    var list = (window.FZ_PROJECTS || []).slice();
     var featureEl = opts.featureId ? document.getElementById(opts.featureId) : null;
     if (featureEl && list.length) {
       featureEl.innerHTML = archiveFeatureHTML(list[0]);
@@ -447,7 +447,7 @@
     initMediaFrames(container);
     initReveals();
   }
-  window.REPLAY.renderArchive = renderArchive;
+  window.FZ.renderArchive = renderArchive;
 
   /* ---------------------------------------------------------------
      Footer year
@@ -460,14 +460,14 @@
 
   /* ---------------------------------------------------------------
      Hero showreel — points the hero's media-frame at
-     window.REPLAY_SHOWREEL (see data.js) before it gets wired up by
+     window.FZ_SHOWREEL (see data.js) before it gets wired up by
      initMediaFrames, so a real showreel takes over automatically the
      moment its paths are filled in. Runs before initMediaFrames.
   --------------------------------------------------------------- */
   function applyShowreelConfig() {
     var frame = document.getElementById('heroMedia');
     if (!frame) return;
-    var reel = window.REPLAY_SHOWREEL;
+    var reel = window.FZ_SHOWREEL;
     if (!reel || (!reel.mp4 && !reel.webm)) return;
     frame.dataset.mp4 = reel.mp4 || '';
     frame.dataset.webm = reel.webm || '';

@@ -6,7 +6,7 @@ studio placeholder. Drop files in here using these exact names:
   assets/media/showreel/showreel-mobile.mp4   optional, lighter cut for phones (<640px)
   assets/media/showreel/poster.jpg            shown before/while the video loads
 
-Then point REPLAY_SHOWREEL at them in assets/js/data.js — that's the
+Then point FZ_SHOWREEL at them in assets/js/data.js — that's the
 only edit needed, the homepage picks it up automatically.
 
 What the showreel should be, and isn't:

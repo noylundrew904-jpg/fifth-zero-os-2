@@ -16,7 +16,7 @@
   }
 
   function renderNotFound(slug) {
-    document.title = 'Project Not Found — REPLAY';
+    document.title = 'Project Not Found — Fifth & Zero';
     document.getElementById('main').innerHTML =
       '<section class="not-found">' +
         '<div class="container">' +
@@ -29,7 +29,7 @@
   }
 
   function render() {
-    var projects = window.REPLAY_PROJECTS || [];
+    var projects = window.FZ_PROJECTS || [];
     var slug = getSlug();
     var project = slug ? projects.find(function (p) { return p.slug === slug; }) : projects[0];
 
@@ -42,16 +42,16 @@
     var next = projects[(index + 1) % projects.length];
     var prev = projects[(index - 1 + projects.length) % projects.length];
 
-    document.title = project.title + ' — REPLAY';
+    document.title = project.title + ' — Fifth & Zero';
     var metaDesc = document.querySelector('meta[name="description"]');
     if (metaDesc) metaDesc.setAttribute('content', project.description || project.brief);
     var ogTitle = document.querySelector('meta[property="og:title"]');
-    if (ogTitle) ogTitle.setAttribute('content', project.title + ' — REPLAY');
+    if (ogTitle) ogTitle.setAttribute('content', project.title + ' — Fifth & Zero');
     var ogDesc = document.querySelector('meta[property="og:description"]');
     if (ogDesc) ogDesc.setAttribute('content', project.description || project.brief);
 
     document.getElementById('projectHero').innerHTML =
-      window.REPLAY.mediaFrameHTML({
+      window.FZ.mediaFrameHTML({
         mp4: project.media.mp4, webm: project.media.webm, mp4Mobile: project.media.mp4Mobile, poster: project.media.poster,
         tag: project.category + (project.media.mp4 ? '' : ' / REPLACE MEDIA'), cam: 'CAM A · LIVE', sweep: true
       });
@@ -59,7 +59,7 @@
     document.getElementById('projectNum').textContent = 'Project ' + project.id;
     var titleEl = document.getElementById('projectTitle');
     titleEl.textContent = project.title;
-    window.REPLAY.fitTextLine(titleEl);
+    window.FZ.fitTextLine(titleEl);
     document.getElementById('projectSub').textContent = project.client ? project.category + ' — ' + project.client : project.category + ' — ' + project.event;
     document.getElementById('projectTags').innerHTML =
       '<span class="eyebrow mono">' + project.location + '</span>' +
@@ -85,7 +85,7 @@
     show('projectGallerySection', hasGallery);
     if (hasGallery) {
       document.getElementById('projectGallery').innerHTML = project.gallery.map(function (g, i) {
-        return window.REPLAY.mediaFrameHTML({
+        return window.FZ.mediaFrameHTML({
           image: g.image, alt: g.alt || (project.title + ' — frame ' + (i + 1)),
           tag: 'FRAME ' + String(i + 1).padStart(4, '0'), cursor: g.image ? '' : 'IMAGE / REPLACE'
         });
@@ -96,7 +96,7 @@
     if (project.result) {
       document.getElementById('projectResult').textContent = project.result;
       document.getElementById('projectResultMedia').innerHTML =
-        window.REPLAY.mediaFrameHTML({
+        window.FZ.mediaFrameHTML({
           mp4: project.media.mp4, webm: project.media.webm, poster: project.media.poster,
           tag: 'THE RESULT', cursor: 'PLAY →'
         });
@@ -116,8 +116,8 @@
     document.getElementById('prevProjectLink').href = 'project.html?slug=' + prev.slug;
     document.getElementById('prevProjectTitle').textContent = prev.title;
 
-    window.REPLAY.initMediaFrames(document);
-    window.REPLAY.initReveals();
+    window.FZ.initMediaFrames(document);
+    window.FZ.initReveals();
   }
 
   document.addEventListener('DOMContentLoaded', render);

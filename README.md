@@ -1,4 +1,4 @@
-# REPLAY — event film studio
+# Fifth & Zero — event film studio
 
 A premium, cinematic, no-build static website for a creative studio that
 makes event films, aftermovies and social-first content for event agencies,
@@ -31,7 +31,7 @@ images/favicon.svg      Favicon / wordmark mark
 
 ## Adding a new event film
 
-Open `assets/js/data.js` and append an object to `REPLAY_PROJECTS`:
+Open `assets/js/data.js` and append an object to `FZ_PROJECTS`:
 
 ```js
 {
@@ -59,7 +59,7 @@ No other file needs to change — it shows up on the homepage, in
 ### Swapping in real footage
 
 Every video placeholder is a `.media-frame` element built by
-`REPLAY.mediaFrameHTML()` in `assets/js/main.js`. As soon as a project's
+`FZ.mediaFrameHTML()` in `assets/js/main.js`. As soon as a project's
 `media.mp4` / `media.webm` / `media.poster` fields are filled in, that
 project's frames switch from the animated placeholder treatment to real
 `<video>` playback (hover-to-play on archive cards, in-view autoplay on
