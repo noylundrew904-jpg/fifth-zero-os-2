@@ -30,17 +30,23 @@
 
   function render() {
     var projects = window.FZ_PROJECTS || [];
+    var publicProjects = projects.filter(function (p) { return !p.gated; });
     var slug = getSlug();
-    var project = slug ? projects.find(function (p) { return p.slug === slug; }) : projects[0];
+    var project = slug ? projects.find(function (p) { return p.slug === slug; }) : publicProjects[0];
 
     if (!project) {
       renderNotFound(slug);
       return;
     }
 
-    var index = projects.indexOf(project);
-    var next = projects[(index + 1) % projects.length];
-    var prev = projects[(index - 1 + projects.length) % projects.length];
+    if (project.gated) {
+      window.location.replace('inquire.html?project=' + encodeURIComponent(project.slug));
+      return;
+    }
+
+    var index = publicProjects.indexOf(project);
+    var next = publicProjects[(index + 1) % publicProjects.length];
+    var prev = publicProjects[(index - 1 + publicProjects.length) % publicProjects.length];
 
     document.title = project.title + ' — Fifth & Zero';
     var metaDesc = document.querySelector('meta[name="description"]');

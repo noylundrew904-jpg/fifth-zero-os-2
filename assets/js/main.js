@@ -449,8 +449,11 @@
 
   /* ---------------------------------------------------------------
      Archive builders — shared by homepage teaser + work.html.
-     Item 001 renders as a full-bleed "feature" (film-poster style);
-     everything else drops into the asymmetric grid.
+     Gated projects (see data.js) are filtered out before anything
+     renders, so they never appear here — see project.js for what
+     happens if someone reaches a gated slug directly. The first
+     remaining item renders as a full-bleed "feature" (film-poster
+     style); everything else drops into the asymmetric grid.
   --------------------------------------------------------------- */
   function archiveCardHTML(project) {
     var span = project.span || 6;
@@ -494,7 +497,7 @@
     var container = document.getElementById(containerId);
     if (!container) return;
     opts = opts || {};
-    var list = (window.FZ_PROJECTS || []).slice();
+    var list = (window.FZ_PROJECTS || []).filter(function (p) { return !p.gated; });
     var featureEl = opts.featureId ? document.getElementById(opts.featureId) : null;
     if (featureEl && list.length) {
       featureEl.innerHTML = archiveFeatureHTML(list[0]);
@@ -552,5 +555,10 @@
     initTimecode();
     if (document.getElementById('archiveTeaser')) renderArchive('archiveTeaser', { featureId: 'archiveFeature', limit: 5 });
     if (document.getElementById('workGrid')) renderArchive('workGrid', { featureId: 'archiveFeature' });
+    var heroCount = document.getElementById('heroArchiveCount');
+    if (heroCount) {
+      var publicCount = (window.FZ_PROJECTS || []).filter(function (p) { return !p.gated; }).length;
+      heroCount.textContent = 'SELECTED 001—' + String(publicCount).padStart(3, '0');
+    }
   });
 })();

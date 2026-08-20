@@ -43,6 +43,20 @@ window.FZ_SHOWREEL = {
 };
 
 /**
+ * Inquiry flow config — used by inquire.html.
+ * Most of the archive is gated (see `gated: true` on projects below):
+ * instead of a public case study, visiting a gated project redirects to
+ * inquire.html, which offers a mailto and, once you have one, a link to
+ * a Google Form. Paste the form's public "Send" link (the one ending in
+ * /viewform, not /edit) into formUrl below to turn that button on —
+ * until then it just stays hidden and the mailto option carries the page.
+ */
+window.FZ_INQUIRE = {
+  email: 'hello@fifthandzero.studio',
+  formUrl: '' // e.g. 'https://docs.google.com/forms/d/e/XXXXXXX/viewform'
+};
+
+/**
  * ------------------------------------------------------------------
  * NOTE ON THE PROJECTS BELOW: these are conceptual visual studies, not
  * case studies of real client work. There is no client, no real event,
@@ -54,6 +68,12 @@ window.FZ_SHOWREEL = {
  * information once real client work exists. Never invent a client
  * name, a crew name, or a real-world outcome (attendance, reach,
  * business impact) for placeholder content.
+ *
+ * GATING: only THE REVEAL and FULL VOLUME are public right now — the
+ * other five carry `gated: true`. Gated projects never appear in the
+ * archive grid and are unreachable directly: visiting their slug
+ * redirects to inquire.html instead of showing the case study. Flip
+ * `gated` on any project to change what's public.
  * ------------------------------------------------------------------
  */
 window.FZ_PROJECTS = [
@@ -101,6 +121,7 @@ window.FZ_PROJECTS = [
     location: 'Lisbon, Portugal',
     year: 2025,
     category: 'EVENT FILM',
+    gated: true,
     description: 'A visual study in low light and proximity — what a night event feels like from inside the crowd, not from the photo pit.',
     span: 4,
     vertical: true,
@@ -130,6 +151,7 @@ window.FZ_PROJECTS = [
     location: 'Austin, USA',
     year: 2025,
     category: 'RECAP FILM',
+    gated: true,
     description: 'A visual study in pace — how to cut a conference so it moves like a live show instead of a slideshow.',
     span: 6,
     vertical: false,
@@ -158,6 +180,7 @@ window.FZ_PROJECTS = [
     location: 'Chamonix, France',
     year: 2025,
     category: 'AFTERMOVIE',
+    gated: true,
     description: 'A visual study in scale — how a single activation can be cut to feel like the centre of the calendar, not one stop on it.',
     span: 4,
     vertical: true,
@@ -185,6 +208,7 @@ window.FZ_PROJECTS = [
     location: 'Singapore',
     year: 2024,
     category: 'RECAP FILM',
+    gated: true,
     description: 'A visual study in what’s left once the main stage empties — the parts of a corporate event that usually go uncut.',
     span: 7,
     vertical: false,
@@ -213,6 +237,7 @@ window.FZ_PROJECTS = [
     location: 'Manchester, UK',
     year: 2026,
     category: 'AFTERMOVIE',
+    gated: true,
     description: 'A visual study in collective energy — how a crowd becomes the actual subject of an event film, not the backdrop to it.',
     span: 5,
     vertical: false,
