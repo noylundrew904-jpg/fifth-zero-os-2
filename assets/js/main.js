@@ -439,11 +439,17 @@
   function initSoundToggle() {
     var btn = document.querySelector('.sound-toggle');
     if (!btn) return;
+    var audio = document.getElementById('siteAudio');
+    if (audio) audio.volume = 0.55;
     btn.addEventListener('click', function () {
       var on = btn.classList.toggle('is-on');
       btn.setAttribute('aria-pressed', on ? 'true' : 'false');
       btn.querySelector('.label').textContent = on ? 'SOUND ON' : 'SOUND OFF';
       document.querySelectorAll('.media-frame video').forEach(function (v) { v.muted = !on; });
+      if (audio) {
+        if (on) audio.play().catch(function () {});
+        else audio.pause();
+      }
     });
   }
 
