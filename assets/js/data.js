@@ -69,11 +69,16 @@ window.FZ_INQUIRE = {
  * name, a crew name, or a real-world outcome (attendance, reach,
  * business impact) for placeholder content.
  *
- * GATING: only THE REVEAL and FULL VOLUME are public right now — the
- * other five carry `gated: true`. Gated projects never appear in the
- * archive grid and are unreachable directly: visiting their slug
- * redirects to inquire.html instead of showing the case study. Flip
- * `gated` on any project to change what's public.
+ * GATING: THE REVEAL, FULL VOLUME and THE RELAUNCH are public right
+ * now — the other six carry `gated: true`. Gated projects never appear
+ * in the archive grid and are unreachable directly: visiting their
+ * slug redirects to inquire.html instead of showing the case study.
+ * Flip `gated` on any project to change what's public.
+ *
+ * SERVICE LINES: event work (TEASER / EVENT FILM / RECAP FILM /
+ * AFTERMOVIE) and brand/marketing work (BRAND FILM / MARKETING
+ * CAMPAIGN) share this same archive and template — add new categories
+ * freely, nothing elsewhere needs to know about them.
  * ------------------------------------------------------------------
  */
 window.FZ_PROJECTS = [
@@ -286,6 +291,64 @@ window.FZ_PROJECTS = [
       { image: '', alt: 'Full Volume — performer close-up' },
       { image: '', alt: 'Full Volume — crowd under lights' },
       { image: '', alt: 'Full Volume — pyrotechnics / lighting burst' }
+    ],
+    credits: []
+  },
+  {
+    id: '008',
+    slug: 'the-relaunch',
+    title: 'THE RELAUNCH',
+    event: 'Brand Launch',
+    location: 'Amsterdam, Netherlands',
+    year: 2026,
+    category: 'BRAND FILM',
+    description: 'A visual study in arrival — the film that introduces a brand the moment it’s ready to be seen, not before.',
+    span: 6,
+    vertical: false,
+    media: { mp4: '', webm: '', mp4Mobile: '', poster: '' },
+    stats: [
+      { label: 'Format', value: 'Brand Film' },
+      { label: 'Treatment', value: 'Clean Reveal' },
+      { label: 'Palette', value: 'Brand-Led' },
+      { label: 'Mood', value: 'Confidence' }
+    ],
+    brief: 'A study in arrival — how to introduce a brand the moment it’s ready to be seen, built to run before the logo does the talking.',
+    approach: 'Identity elements — mark, type, colour — treated as characters in their own right, cut to a rhythm that mirrors the brand’s own pace rather than a generic launch-video tempo.',
+    result: 'A film built to open a campaign, not close one — the first thing an audience sees of the brand, not a recap of what it already was.',
+    gallery: [
+      { image: '', alt: 'The Relaunch — mark reveal' },
+      { image: '', alt: 'The Relaunch — type in motion' },
+      { image: '', alt: 'The Relaunch — colour study' },
+      { image: '', alt: 'The Relaunch — product in context' }
+    ],
+    credits: []
+  },
+  {
+    id: '009',
+    slug: 'the-campaign',
+    title: 'THE CAMPAIGN',
+    event: 'Marketing Campaign',
+    location: 'Toronto, Canada',
+    year: 2026,
+    category: 'MARKETING CAMPAIGN',
+    gated: true,
+    description: 'A visual study in repetition — the short-form cutdowns that carry a single brand idea across a feed instead of a single hero spot.',
+    span: 5,
+    vertical: true,
+    media: { mp4: '', webm: '', mp4Mobile: '', poster: '' },
+    stats: [
+      { label: 'Format', value: 'Campaign Cutdowns' },
+      { label: 'Treatment', value: 'Social-First' },
+      { label: 'Palette', value: 'On-Brand' },
+      { label: 'Mood', value: 'Momentum' }
+    ],
+    brief: 'A study in repetition — how a single brand idea survives being cut down a dozen different ways for a dozen different feeds.',
+    approach: 'One hero idea, reframed vertical-first and re-cut for 6/15/30-second placements without losing the thread that ties them together.',
+    result: 'A campaign built to be seen in fragments, each one still recognisably the same idea.',
+    gallery: [
+      { image: '', alt: 'The Campaign — vertical cutdown 01' },
+      { image: '', alt: 'The Campaign — vertical cutdown 02' },
+      { image: '', alt: 'The Campaign — feed grid mockup' }
     ],
     credits: []
   }
