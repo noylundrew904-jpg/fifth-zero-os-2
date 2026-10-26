@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!-- EDIT: every line marked EDIT is personal content. Search this file for "EDIT". -->
+<title>Your Name — Director &amp; Creative Producer</title><!-- EDIT -->
+<meta name="description" content="Your Name is a director and creative producer making music videos, brand films and motion design for artists and brands. Based in Your City, working worldwide." /><!-- EDIT -->
+<link rel="canonical" href="https://example.com/" /><!-- EDIT -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Your Name — Director &amp; Creative Producer" /><!-- EDIT -->
+<meta property="og:description" content="Music videos, brand films and motion design. Your City / worldwide." /><!-- EDIT -->
+<meta property="og:image" content="https://example.com/og.jpg" /><!-- EDIT -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#000000" />
+<link rel="icon" type="image/svg+xml" href="favicon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500&display=swap" />
+<link rel="stylesheet" href="brand.css" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Your Name",
+  "jobTitle": "Director & Creative Producer",
+  "url": "https://example.com/",
+  "email": "mailto:hello@example.com",
+  "address": { "@type": "PostalAddress", "addressLocality": "Your City", "addressCountry": "XX" },
+  "sameAs": ["https://instagram.com/yourhandle", "https://linkedin.com/in/yourhandle", "https://vimeo.com/yourhandle"]
+}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" id="nav">
+  <a class="nav-brand" href="#top" aria-label="Home">
+    <img src="favicon.svg" alt="" width="20" height="20" />
+    <span>Your Name</span><!-- EDIT -->
+  </a>
+  <nav aria-label="Primary">
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a class="nav-cta" href="#contact">Start a project</a></li>
+    </ul>
+  </nav>
+  <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks">Menu</button>
+</header>
+
+<main id="main">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" id="top">
+    <p class="eyebrow"><span class="dot" aria-hidden="true"></span> Available for projects from <span id="availMonth">next month</span></p>
+    <h1 class="hero-title">
+      I make films that make<br />
+      people <em class="serif">feel something</em> —<br />
+      and brands worth remembering.
+    </h1><!-- EDIT -->
+    <p class="hero-sub">
+      Director &amp; creative producer for music videos, brand films and 3D&nbsp;motion.
+      Based in Your City, shooting worldwide.
+    </p><!-- EDIT -->
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#contact">Start a project <span aria-hidden="true">→</span></a>
+      <a class="btn btn-ghost" href="#work">See selected work</a>
+    </div>
+    <dl class="stats">
+      <div><dt>Projects shipped</dt><dd data-count="60">60+</dd></div><!-- EDIT -->
+      <div><dt>Years directing</dt><dd data-count="8">8</dd></div><!-- EDIT -->
+      <div><dt>Combined views</dt><dd>12M</dd></div><!-- EDIT -->
+      <div><dt>Based in</dt><dd>Your City</dd></div><!-- EDIT -->
+    </dl>
+  </section>
+
+  <!-- ============ CLIENT STRIP ============ -->
+  <section class="logos" aria-label="Selected clients">
+    <p class="label">Trusted by artists, studios &amp; institutions</p>
+    <div class="marquee"><div class="marquee-track">
+      <!-- EDIT: client / collaborator names (or swap for <img> logos) -->
+      <span>Client One</span><span>Client Two</span><span>Client Three</span><span>Client Four</span><span>Client Five</span><span>Client Six</span>
+      <span aria-hidden="true">Client One</span><span aria-hidden="true">Client Two</span><span aria-hidden="true">Client Three</span><span aria-hidden="true">Client Four</span><span aria-hidden="true">Client Five</span><span aria-hidden="true">Client Six</span>
+    </div></div>
+  </section>
+
+  <!-- ============ WORK ============ -->
+  <section class="section" id="work">
+    <div class="section-head">
+      <div>
+        <p class="label">01 — Selected work</p>
+        <h2>Work that earns the <em class="serif">second watch</em>.</h2>
+      </div>
+      <div class="filters" role="group" aria-label="Filter work">
+        <button class="chip active" data-filter="all" aria-pressed="true">All</button>
+        <button class="chip" data-filter="music" aria-pressed="false">Music video</button>
+        <button class="chip" data-filter="brand" aria-pressed="false">Brand</button>
+        <button class="chip" data-filter="motion" aria-pressed="false">3D / Motion</button>
+        <button class="chip" data-filter="film" aria-pressed="false">Short film</button>
+      </div>
+    </div>
+
+    <!-- EDIT: each card = one project. Set data-cat, the link, the poster
+         image (put files in brand/work/), title, role and the result line. -->
+    <div class="grid" id="workGrid">
+      <a class="card card-lg" data-cat="music" href="#">
+        <div class="thumb" style="--hue:290"><span class="play" aria-hidden="true">▶</span></div>
+        <div class="card-meta">
+          <span class="tag">Music video</span>
+          <h3>Artist — “Song title”</h3>
+          <p>Director · Producer. One-take narrative shot over two nights.</p>
+        </div>
+      </a>
+      <a class="card" data-cat="motion" href="#">
+        <div class="thumb" style="--hue:200"><span class="play" aria-hidden="true">▶</span></div>
+        <div class="card-meta">
+          <span class="tag">3D / Motion</span>
+          <h3>University research lab</h3>
+          <p>3D motion system explaining legal-tech research in 60 seconds.</p>
+        </div>
+      </a>
+      <a class="card" data-cat="brand" href="#">
+        <div class="thumb" style="--hue:75"><span class="play" aria-hidden="true">▶</span></div>
+        <div class="card-meta">
+          <span class="tag">Brand film</span>
+          <h3>Studio campaign</h3>
+          <p>Creative producer. Campaign films &amp; stills for studio clients.</p>
+        </div>
+      </a>
+      <a class="card" data-cat="film" href="#">
+        <div class="thumb" style="--hue:20"><span class="play" aria-hidden="true">▶</span></div>
+        <div class="card-meta">
+          <span class="tag">Short film</span>
+          <h3>Project title</h3>
+          <p>Writer · Director. Festival selection, 2025.</p>
+        </div>
+      </a>
+      <a class="card" data-cat="brand" href="#">
+        <div class="thumb" style="--hue:150"><span class="play" aria-hidden="true">▶</span></div>
+        <div class="card-meta">
+          <span class="tag">Brand film</span>
+          <h3>Project title</h3>
+          <p>Launch film + 12 social cut-downs. +38% engagement vs. last campaign.</p>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ SERVICES ============ -->
+  <section class="section" id="services">
+    <div class="section-head">
+      <div>
+        <p class="label">02 — What I do</p>
+        <h2>One person from <em class="serif">idea to final export</em>.</h2>
+      </div>
+    </div>
+    <div class="services">
+      <article class="service">
+        <span class="service-num">A</span>
+        <h3>Music videos</h3>
+        <p>Concept, treatment, direction and post for artists and labels who want a visual identity, not just a clip.</p>
+        <ul><li>Treatment &amp; moodboard</li><li>Shoot &amp; direction</li><li>Edit, grade, vertical cut-downs</li></ul>
+      </article>
+      <article class="service">
+        <span class="service-num">B</span>
+        <h3>Brand films &amp; content</h3>
+        <p>Campaign films and photo for brands that need one coherent story across web, social and ads.</p>
+        <ul><li>Creative strategy</li><li>Production &amp; crew</li><li>Asset packs for every channel</li></ul>
+      </article>
+      <article class="service">
+        <span class="service-num">C</span>
+        <h3>3D &amp; motion design</h3>
+        <p>Explainers and product visuals for tech, research and anything that is hard to film.</p>
+        <ul><li>Style frames</li><li>3D animation</li><li>Sound design</li></ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ PROCESS ============ -->
+  <section class="section process" aria-labelledby="processTitle">
+    <p class="label">03 — How it works</p>
+    <h2 id="processTitle">Clear steps. <em class="serif">No surprises.</em></h2>
+    <ol class="steps">
+      <li><span>01</span><h3>Call</h3><p>30 minutes on goals, budget and deadline. Free.</p></li>
+      <li><span>02</span><h3>Treatment</h3><p>Concept, references and a fixed quote within 5 days.</p></li>
+      <li><span>03</span><h3>Production</h3><p>Pre-pro, shoot days and weekly progress updates.</p></li>
+      <li><span>04</span><h3>Delivery</h3><p>Master + all formats, two revision rounds included.</p></li>
+    </ol>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="section about" id="about">
+    <div class="about-photo" role="img" aria-label="Portrait of Your Name">
+      <!-- EDIT: replace with <img src="work/portrait.jpg" alt="Portrait of Your Name"> -->
+      <span class="serif">YN</span>
+    </div>
+    <div class="about-body">
+      <p class="label">04 — About</p>
+      <h2>Hi, I’m Your Name.</h2><!-- EDIT -->
+      <p class="lead">
+        I’m a director and creative producer based in Your City. I started
+        out shooting music videos for friends; today I lead productions for artists,
+        studios and institutions — from first sketch to final grade.
+      </p><!-- EDIT -->
+      <p>
+        I care about two things: images people remember, and productions that run on time
+        and on budget. Working with me means one point of contact who understands both the
+        story and the spreadsheet.
+      </p><!-- EDIT -->
+      <!-- EDIT: one consistent career story — the same titles you use on LinkedIn -->
+      <ol class="timeline">
+        <li><time>2024 — now</time><div><strong>Independent director &amp; producer</strong><span>Your Studio · Your City</span></div></li>
+        <li><time>2021 — 2024</time><div><strong>Creative Producer</strong><span>Studio name · City</span></div></li>
+        <li><time>2018 — 2021</time><div><strong>Freelance videographer</strong><span>Music &amp; events</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ TESTIMONIAL ============ -->
+  <section class="section quote" aria-label="Testimonial">
+    <blockquote>
+      <p class="serif">“Calm on set, obsessive in the edit. We got a video that still outperforms everything else on our channel.”</p>
+      <footer>— Client name, Role at Company</footer>
+    </blockquote><!-- EDIT -->
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="section contact" id="contact">
+    <p class="label">05 — Contact</p>
+    <h2 class="contact-title">Have a project?<br /><em class="serif">Let’s make it.</em></h2>
+    <p class="contact-sub">Tell me what you’re making, when it needs to ship and a rough budget. I reply within one working day.</p>
+    <div class="contact-actions">
+      <a class="btn btn-primary btn-lg" href="mailto:hello@example.com?subject=New%20project">hello@example.com <span aria-hidden="true">→</span></a><!-- EDIT -->
+      <button class="btn btn-ghost btn-lg" id="copyEmail" data-email="hello@example.com">Copy email</button><!-- EDIT -->
+    </div>
+    <ul class="socials">
+      <li><a href="https://instagram.com/yourhandle" target="_blank" rel="noopener">Instagram</a></li><!-- EDIT -->
+      <li><a href="https://vimeo.com/yourhandle" target="_blank" rel="noopener">Vimeo</a></li><!-- EDIT -->
+      <li><a href="https://linkedin.com/in/yourhandle" target="_blank" rel="noopener">LinkedIn</a></li><!-- EDIT -->
+      <li><a href="https://youtube.com/@yourhandle" target="_blank" rel="noopener">YouTube</a></li><!-- EDIT -->
+    </ul>
+  </section>
+</main>
+
+<footer class="footer">
+  <span>© <span id="year">2026</span> Your Name · Your City</span><!-- EDIT -->
+  <span>Built with Fifth Zero</span>
+  <a href="#top">Back to top ↑</a>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="brand.js"></script>
+</body>
+</html>
