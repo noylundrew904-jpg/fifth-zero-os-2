@@ -97,6 +97,13 @@ enum Schema {
             }
         }
 
+        migrator.registerMigration("v3-operation-fingerprint") { db in
+            try db.alter(table: "operation") { t in
+                t.add(column: "movedSizeBytes", .integer)
+                t.add(column: "movedModifiedAt", .datetime)
+            }
+        }
+
         return migrator
     }
 }

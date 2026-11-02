@@ -203,7 +203,8 @@ public final class CreativeStore {
                         id: UUID().uuidString, batchID: batchID, assetID: nil, kind: "move",
                         sourcePath: action.sourcePath, destinationPath: destination, crossVolume: crossVolume,
                         state: .planned, risk: action.risk.rawValue, requiresApproval: action.requiresApproval,
-                        explanation: action.explanation, createdAt: now, updatedAt: now, errorMessage: nil)
+                        explanation: action.explanation, createdAt: now, updatedAt: now, errorMessage: nil,
+                        movedSizeBytes: nil, movedModifiedAt: nil)
                     try record.insert(db)
                     records.append(record)
                 case .leaveInPlace:
@@ -224,22 +225,50 @@ public final class CreativeStore {
     public func transition(operationID: String, to next: OperationState, error: String? = nil,
                            at now: Date = Date()) throws -> OperationRecord {
         try dbQueue.write { db in
-            guard var op = try OperationRecord.fetchOne(db, key: operationID) else {
-                throw StoreError.notFound(operationID)
-            }
-            guard op.state.canTransition(to: next) else {
-                throw StoreError.invalidTransition(from: op.state, to: next)
-            }
-            let previous = op.state
-            op.state = next
-            op.updatedAt = now
-            op.errorMessage = error
-            try op.update(db)
-            var message = "\(op.kind): \(previous.rawValue) → \(next.rawValue) for \(op.sourcePath)"
-            if let error { message += ". Error: \(error)" }
-            try Self.audit(db, "operation.\(next.rawValue)", message, operationID: op.id, at: now)
-            return op
+            try Self.applyTransition(db, operationID: operationID, to: next, error: error, at: now)
         }
+    }
+
+    /// Marks a move completed and remembers the moved file's size and modification date (for safe undo).
+    @discardableResult
+    public func complete(operationID: String, movedSize: Int64?, movedModifiedAt: Date?,
+                         at now: Date = Date()) throws -> OperationRecord {
+        try dbQueue.write { db in
+            try Self.applyTransition(db, operationID: operationID, to: .completed, error: nil, at: now) { op in
+                op.movedSizeBytes = movedSize
+                op.movedModifiedAt = movedModifiedAt
+            }
+        }
+    }
+
+    public func operation(id: String) throws -> OperationRecord? {
+        try dbQueue.read { db in try OperationRecord.fetchOne(db, key: id) }
+    }
+
+    /// Adds a plain note to the audit log (for example, why an action was refused).
+    public func note(_ kind: String, _ message: String, operationID: String? = nil, at now: Date = Date()) throws {
+        try dbQueue.write { db in try Self.audit(db, kind, message, operationID: operationID, at: now) }
+    }
+
+    private static func applyTransition(_ db: Database, operationID: String, to next: OperationState,
+                                        error: String?, at now: Date,
+                                        extra: (inout OperationRecord) -> Void = { _ in }) throws -> OperationRecord {
+        guard var op = try OperationRecord.fetchOne(db, key: operationID) else {
+            throw StoreError.notFound(operationID)
+        }
+        guard op.state.canTransition(to: next) else {
+            throw StoreError.invalidTransition(from: op.state, to: next)
+        }
+        let previous = op.state
+        op.state = next
+        op.updatedAt = now
+        op.errorMessage = error
+        extra(&op)
+        try op.update(db)
+        var message = "\(op.kind): \(previous.rawValue) → \(next.rawValue) for \(op.sourcePath)"
+        if let error { message += ". Error: \(error)" }
+        try audit(db, "operation.\(next.rawValue)", message, operationID: op.id, at: now)
+        return op
     }
 
     public func operations(batchID: String) throws -> [OperationRecord] {

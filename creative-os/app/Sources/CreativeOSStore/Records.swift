@@ -60,6 +60,10 @@ public struct OperationRecord: Codable, Equatable, FetchableRecord, PersistableR
     public var createdAt: Date
     public var updatedAt: Date
     public var errorMessage: String?
+    // Added in migration v3: what the moved file looked like right after the move.
+    // Undo only proceeds if the file still matches, so it never "restores" a file you edited later.
+    public var movedSizeBytes: Int64?
+    public var movedModifiedAt: Date?
 }
 
 /// One line of the append-only audit log. The database refuses edits and deletions.

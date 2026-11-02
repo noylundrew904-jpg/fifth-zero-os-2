@@ -28,6 +28,13 @@ let package = Package(
             dependencies: ["CreativeOSCore"],
             path: "Sources/CreativeOSSystem"
         ),
+        // The only code allowed to move files: approved, journaled, same-drive moves and undo,
+        // inside user-approved folders only. Contains no delete code.
+        .target(
+            name: "CreativeOSExecutor",
+            dependencies: ["CreativeOSCore", "CreativeOSStore"],
+            path: "Sources/CreativeOSExecutor"
+        ),
         // SwiftUI dashboard (still mock data; not connected to the store yet).
         .executableTarget(
             name: "CreativeOS",
@@ -48,6 +55,11 @@ let package = Package(
             name: "CreativeOSSystemTests",
             dependencies: ["CreativeOSSystem", "CreativeOSCore"],
             path: "Tests/CreativeOSSystemTests"
+        ),
+        .testTarget(
+            name: "CreativeOSExecutorTests",
+            dependencies: ["CreativeOSExecutor", "CreativeOSStore", "CreativeOSCore"],
+            path: "Tests/CreativeOSExecutorTests"
         ),
     ]
 )
