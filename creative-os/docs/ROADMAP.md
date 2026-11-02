@@ -6,15 +6,15 @@ Sources: original build spec (26 decisions), zero-cost requirement, and the
 ## Honest status
 
 Nothing in Creative OS scans, organizes, packages, backs up or analyzes real files yet.
-**No Swift code has been compiled.** The build environment so far had no Swift toolchain.
-The first compile happens on your Mac.
+Every change is built and tested automatically on a free GitHub-hosted Mac
+(`.github/workflows/creative-os.yml`); core logic is also tested on Linux.
 
 | Area | State |
 |---|---|
 | Environment check script (M1) | Written; not yet run on your Mac |
-| Mock dashboard (M2) | Written; not yet compiled. Fictional data only |
-| Safety rules engine (A1) | Written with tests; not yet compiled. Pure logic, no file access |
-| SQLite index, journal, audit log | Missing |
+| Mock dashboard (M2) | Builds on macOS. Fictional data only |
+| Safety rules engine (A1) | Tests pass. Pure logic, no file access |
+| SQLite index, journal, audit log (A2) | Built and tested on fixtures; not connected to the app yet |
 | Registered volumes (real UUIDs) | Missing |
 | Scanner, hashing, classification | Missing |
 | Executing moves, undo, quarantine | Missing |
@@ -41,8 +41,8 @@ The first compile happens on your Mac.
 - [x] M2: Mock dashboard (mock only)
 - **A. Foundation and safety**
   - [x] **A1: Safety rules engine** (pure logic + tests): hierarchy, path safety, collision-safe names, camera-name protection, final-approval and status gates, storage threshold, duplicate and quarantine eligibility, dry-run planner with no delete operation
-  - [ ] **A2: Local database and journal** (next): GRDB.swift (MIT) migrations for volumes, assets (stable IDs), rules, operation journal, append-only audit log, quarantine manifest
-  - [ ] A3: Registered volumes: read volume UUID/capacity (read-only), register, offline detection
+  - [x] **A2: Local database and journal**: GRDB.swift (MIT) migrations for volumes, assets (stable IDs), rules, operation journal, append-only audit log, quarantine manifest
+  - [ ] **A3: Registered volumes** (next): read volume UUID/capacity (read-only), register, offline detection
   - [ ] A4: File-operation state machine: same-volume move + journal + undo, tested **only in disposable temp fixture folders**
   - [ ] A5: Streaming SHA-256 hasher + interrupted-copy tests (fixtures)
 - **B. Organize Now:** scoped read-only scan of approved folders → index → suggestions → virtual Review Inbox → preview → approved execution

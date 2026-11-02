@@ -4,9 +4,10 @@ Local-first, one-click creative file organizer for macOS.
 Free and offline: see [docs/ZERO_COST.md](docs/ZERO_COST.md).
 Status, gap analysis and next steps: see [docs/ROADMAP.md](docs/ROADMAP.md).
 
-**Current state:** mock dashboard plus a tested safety rules engine.
-Nothing reads, moves, renames, deletes or uploads real files yet, and the code
-has not been compiled yet (first build happens on your Mac).
+**Current state:** mock dashboard, tested safety rules engine, and a tested local
+database (journal + audit log) that is not connected to the app yet.
+Nothing reads, moves, renames, deletes or uploads real files yet.
+Every change is built and tested automatically on a free GitHub-hosted Mac.
 
 ## Run it (on your Mac)
 
@@ -40,8 +41,11 @@ app/Sources/CreativeOSCore/          Foundation-only logic (no file access)
     Approvals.swift                  final-approval and campaign-status gates
     StorageAndDuplicates.swift       15%/50 GB rule, byte-identical rule, quarantine policy
     ActionPlanner.swift              dry-run planner (move / leave in place / skip; no delete)
+app/Sources/CreativeOSStore/         A2 local SQLite notebook (GRDB): volumes, assets, rules,
+                                     operation journal, append-only audit log, quarantine manifest
 app/Sources/CreativeOS/              SwiftUI dashboard (mock data)
 app/Tests/CreativeOSCoreTests/       Tests for mock data and every safety rule
+app/Tests/CreativeOSStoreTests/      Database tests (in-memory or disposable temp folder)
 tools/                               Read-only helper scripts
 docs/                                Zero-cost policy, roadmap
 ```

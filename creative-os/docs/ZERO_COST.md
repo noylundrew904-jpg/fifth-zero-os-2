@@ -18,7 +18,7 @@ replacement is listed below.
 | LGPL / GPL command-line tools (e.g. FFmpeg) | **Optional only**, installed by you, run as a separate program, never bundled or linked. |
 | Anything paid, account-gated or with usage fees | Not allowed. |
 
-Current third-party dependencies: **none**. GRDB.swift (MIT) is planned for milestone A2 (see ROADMAP.md).
+Current third-party dependencies: **GRDB.swift 6.29.3 (MIT)**, pinned exactly. (7.x needs a newer Xcode than macOS 13/14 can run.)
 
 ## Feature map
 

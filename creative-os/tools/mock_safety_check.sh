@@ -17,6 +17,12 @@ for p in "${patterns[@]}"; do
   if grep -rnF -- "$p" . ; then found=1; fi
 done
 
+# The dashboard must not use the database store until scanning is approved.
+if grep -rn "import CreativeOSStore" CreativeOS ; then
+  echo "FAIL: the app is connected to the database store too early." >&2
+  found=1
+fi
+
 if [[ $found -ne 0 ]]; then
   echo "FAIL: file-system, process or network API found in mock-phase source." >&2
   exit 1
