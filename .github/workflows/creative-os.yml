@@ -1,0 +1,33 @@
+# Creative OS: build and test on a free GitHub-hosted Mac.
+# Uses only the repository's own code and mock/fixture data; never user files.
+name: Creative OS
+
+on:
+  push:
+    paths:
+      - "creative-os/**"
+      - ".github/workflows/creative-os.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    runs-on: macos-15
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: creative-os/app
+    steps:
+      - uses: actions/checkout@v4
+      - name: Toolchain
+        run: |
+          sw_vers
+          swift --version
+      - name: Safety check (no file, process or network code)
+        run: bash ../tools/mock_safety_check.sh
+      - name: Build app
+        run: swift build
+      - name: Run tests
+        run: swift test
