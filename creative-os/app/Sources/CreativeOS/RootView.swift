@@ -10,7 +10,7 @@ enum SidebarItem: String, CaseIterable, Identifiable, Hashable {
     var title: String {
         switch self {
         case .overview: return "Overview"
-        case .projects: return "Active Projects"
+        case .projects: return "Campaigns"
         case .drives: return "Drives & Storage"
         case .review: return "Review Inbox"
         case .quarantine: return "Duplicate Quarantine"

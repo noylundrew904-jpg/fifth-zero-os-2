@@ -35,7 +35,7 @@ struct OverviewView: View {
                 }
 
                 LazyVGrid(columns: [GridItem(.adaptive(minimum: 190), spacing: 14)], spacing: 14) {
-                    stat("Active projects", "\(snapshot.activeProjects.count)", "folder", .projects)
+                    stat("Active campaigns", "\(snapshot.activeProjects.count)", "folder", .projects)
                     stat("Review inbox", "\(snapshot.reviewItems.count)", "tray", .review)
                     stat("In quarantine", "\(snapshot.quarantine.count)", "doc.on.doc", .quarantine)
                     stat("Archive suggestions", "\(snapshot.archiveSuggestions.count)", "archivebox", .archive)

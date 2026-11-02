@@ -17,7 +17,7 @@ public enum MockData {
 
         let volumes = [
             StorageVolume(id: UUID(), name: "Macintosh HD (mock)", kind: .internalDisk,
-                          role: "Active projects", totalBytes: 1 * TB, freeBytes: 212 * GB,
+                          role: "Active campaigns", totalBytes: 1 * TB, freeBytes: 120 * GB,
                           isOnline: true, isRegistered: true),
             StorageVolume(id: UUID(), name: "MOCK_Footage_SSD", kind: .external,
                           role: "Large footage", totalBytes: 2 * TB, freeBytes: 640 * GB,
@@ -101,8 +101,8 @@ public enum MockData {
         let plan = [
             PlannedOperation(id: UUID(), kind: .move,
                              source: "\(root)/Downloads/ACME_SpringLaunch_Storyboard_v03.pdf",
-                             destination: "\(master)/01_ACTIVE_PROJECTS/ACME/Spring_Launch/01_BRIEF_REFERENCES/",
-                             reason: "Previously approved rule: ACME briefs go to the project's brief folder.",
+                             destination: "\(master)/01_CLIENTS/ACME/Spring_Launch/Brief_References/",
+                             reason: "Previously approved rule: ACME briefs go to the campaign's Brief_References folder.",
                              confidence: 0.96, risk: .low, isLinkedToProject: false, needsApproval: false),
             PlannedOperation(id: UUID(), kind: .rename,
                              source: "\(root)/Desktop/export.mp4",
@@ -127,16 +127,16 @@ public enum MockData {
         ]
 
         let index = [
-            SearchRecord(id: UUID(), path: "\(master)/01_ACTIVE_PROJECTS/ACME/Spring_Launch/07_EXPORTS/ACME_SpringLaunch_Teaser_v03.mp4",
+            SearchRecord(id: UUID(), path: "\(master)/01_CLIENTS/ACME/Spring_Launch/Teaser_01/Exports/Instagram_Reels/Revisions/ACME_SpringLaunch_Teaser_v03.mp4",
                          client: "ACME", project: "Spring_Launch", fileType: "mp4",
                          tags: ["teaser", "export", "vertical"], modified: daysAgo(2)),
-            SearchRecord(id: UUID(), path: "\(master)/01_ACTIVE_PROJECTS/ACME/Spring_Launch/04_DESIGN_ASSETS/ACME_SpringLaunch_Poster_v02.psd",
+            SearchRecord(id: UUID(), path: "\(master)/01_CLIENTS/ACME/Spring_Launch/Poster_01/Graphics/ACME_SpringLaunch_Poster_v02.psd",
                          client: "ACME", project: "Spring_Launch", fileType: "psd",
                          tags: ["poster", "design"], modified: daysAgo(4)),
-            SearchRecord(id: UUID(), path: "\(master)/01_ACTIVE_PROJECTS/NORTHWIND/Product_Demo/03_AUDIO/voiceover_take3.wav",
+            SearchRecord(id: UUID(), path: "\(master)/01_CLIENTS/NORTHWIND/Product_Demo/Demo_Video/Audio/voiceover_take3.wav",
                          client: "NORTHWIND", project: "Product_Demo", fileType: "wav",
                          tags: ["voiceover", "audio"], modified: daysAgo(5)),
-            SearchRecord(id: UUID(), path: "\(master)/01_ACTIVE_PROJECTS/INITECH/Podcast_S2/05_AI_ASSETS/episode4_cover_prompt.txt",
+            SearchRecord(id: UUID(), path: "\(master)/01_CLIENTS/INITECH/Podcast_S2/Episode_04/AI_Assets/episode4_cover_prompt.txt",
                          client: "INITECH", project: "Podcast_S2", fileType: "txt",
                          tags: ["prompt", "ai", "cover art"], modified: daysAgo(1)),
             SearchRecord(id: UUID(), path: "\(master)/02_SHARED_ASSETS/MUSIC/GLOBEX_beat_v2.wav",

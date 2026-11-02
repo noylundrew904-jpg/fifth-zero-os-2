@@ -145,6 +145,10 @@ struct VolumeRow: View {
                 Text(volume.name).fontWeight(.medium)
                 Text(volume.role).foregroundStyle(.secondary)
                 Spacer()
+                if StorageRules.isLowOnSpace(totalBytes: volume.totalBytes, freeBytes: volume.freeBytes) {
+                    Pill(text: "Low space", color: .orange)
+                        .help("Below the larger of 15% or 50 GB free.")
+                }
                 if volume.isOnline {
                     Pill(text: "Online", color: .green)
                 } else {

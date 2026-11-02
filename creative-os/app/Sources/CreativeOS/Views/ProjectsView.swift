@@ -7,12 +7,12 @@ struct ProjectsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             PageHeader(
-                title: "Projects",
-                subtitle: "Client / Project / File type. Projects with unverified links are never moved."
+                title: "Campaigns",
+                subtitle: "Client → Campaign → Deliverable → File type. Unverified links are never moved."
             )
             Table(snapshot.projects) {
                 TableColumn("Client", value: \.client)
-                TableColumn("Project", value: \.name)
+                TableColumn("Campaign", value: \.name)
                 TableColumn("Status") { p in Text(p.status.title) }
                 TableColumn("Last activity") { p in
                     Text(p.lastActivity, format: .relative(presentation: .named))
