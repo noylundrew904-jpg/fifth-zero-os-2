@@ -11,6 +11,11 @@ public struct VolumeRecord: Codable, Equatable, FetchableRecord, PersistableReco
     public var isRegistered: Bool
     public var registeredAt: Date?
     public var lastSeenAt: Date?
+    // Added in migration v2:
+    /// False when the drive had no UUID and the user confirmed a fallback identity.
+    public var isStableID: Bool
+    public var lastMountPath: String?
+    public var totalBytes: Int64?
 }
 
 /// One file, with an identifier that stays the same across scans (and later, across moves).

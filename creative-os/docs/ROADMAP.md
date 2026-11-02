@@ -15,7 +15,7 @@ Every change is built and tested automatically on a free GitHub-hosted Mac
 | Mock dashboard (M2) | Builds on macOS. Fictional data only |
 | Safety rules engine (A1) | Tests pass. Pure logic, no file access |
 | SQLite index, journal, audit log (A2) | Built and tested on fixtures; not connected to the app yet |
-| Registered volumes (real UUIDs) | Missing |
+| Registered volumes (A3) | Drive reader (metadata only), UUID matching and registration built and tested; not connected to the app yet |
 | Scanner, hashing, classification | Missing |
 | Executing moves, undo, quarantine | Missing |
 | Collect & Package, backups, restore | Missing |
@@ -42,8 +42,8 @@ Every change is built and tested automatically on a free GitHub-hosted Mac
 - **A. Foundation and safety**
   - [x] **A1: Safety rules engine** (pure logic + tests): hierarchy, path safety, collision-safe names, camera-name protection, final-approval and status gates, storage threshold, duplicate and quarantine eligibility, dry-run planner with no delete operation
   - [x] **A2: Local database and journal**: GRDB.swift (MIT) migrations for volumes, assets (stable IDs), rules, operation journal, append-only audit log, quarantine manifest
-  - [ ] **A3: Registered volumes** (next): read volume UUID/capacity (read-only), register, offline detection
-  - [ ] A4: File-operation state machine: same-volume move + journal + undo, tested **only in disposable temp fixture folders**
+  - [x] **A3: Registered volumes**: read volume UUID/capacity (read-only), register, offline detection
+  - [ ] **A4: File-operation state machine** (next): same-volume move + journal + undo, tested **only in disposable temp fixture folders**
   - [ ] A5: Streaming SHA-256 hasher + interrupted-copy tests (fixtures)
 - **B. Organize Now:** scoped read-only scan of approved folders → index → suggestions → virtual Review Inbox → preview → approved execution
 - **C. Creative workflows:** shared footage, library references, export grouping, version retention, final confirmation, status suggestions in the UI

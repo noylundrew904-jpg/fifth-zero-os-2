@@ -187,4 +187,60 @@ final class CreativeStoreTests: XCTestCase {
             try db.execute(sql: "DELETE FROM quarantineEntry")
         })
     }
+
+    // MARK: Registered drives (A3)
+
+    private func fixtureDrive(uuid: String? = "1234-ABCD", name: String = "Fixture SSD",
+                              path: String = "/Volumes/Fixture SSD") -> VolumeInfo {
+        VolumeInfo(uuid: uuid, name: name, mountPath: path, totalBytes: 2_000_000_000_000,
+                   availableBytes: 900_000_000_000, format: "APFS", isRemovable: true)
+    }
+
+    func testRegisterConnectedDriveByUUID() throws {
+        let store = try CreativeStore.inMemory()
+        let record = try store.registerVolume(fixtureDrive(), role: "Footage")
+        XCTAssertEqual(record.id, "uuid:1234-ABCD")
+        XCTAssertTrue(record.isStableID)
+        XCTAssertEqual(record.lastMountPath, "/Volumes/Fixture SSD")
+        XCTAssertEqual(try store.registeredVolumes(),
+                       [RegisteredVolume(id: "uuid:1234-ABCD", name: "Fixture SSD", role: "Footage")])
+    }
+
+    func testDriveWithoutUUIDNeedsConfirmation() throws {
+        let store = try CreativeStore.inMemory()
+        XCTAssertThrowsError(try store.registerVolume(fixtureDrive(uuid: nil), role: "Archive")) { error in
+            XCTAssertEqual(error as? StoreError, .unstableVolumeID("Fixture SSD"))
+        }
+        let record = try store.registerVolume(fixtureDrive(uuid: nil), role: "Archive", userConfirmedUnstableID: true)
+        XCTAssertFalse(record.isStableID)
+    }
+
+    func testIneligibleDriveIsRefused() throws {
+        let store = try CreativeStore.inMemory()
+        let nas = VolumeInfo(uuid: "N", name: "NAS", mountPath: "/Volumes/NAS", totalBytes: 1, availableBytes: 1, isLocal: false)
+        XCTAssertThrowsError(try store.registerVolume(nas, role: "Archive"))
+        XCTAssertTrue(try store.registeredVolumes().isEmpty)
+    }
+
+    func testRecordSeenTracksNewMountPathAndSkipsOffline() throws {
+        let store = try CreativeStore.inMemory()
+        try store.registerVolume(fixtureDrive(), role: "Footage")
+        try store.registerVolume(fixtureDrive(uuid: "9999-0000", name: "Archive", path: "/Volumes/Archive"), role: "Archive")
+        let remounted = fixtureDrive(path: "/Volumes/Fixture SSD 1")
+        let result = VolumeRegistry.resolve(registered: try store.registeredVolumes(), mounted: [remounted])
+        XCTAssertEqual(result.statuses["uuid:9999-0000"], .offline)
+        try store.recordSeen(result)
+        let byID = Dictionary(uniqueKeysWithValues: try store.volumes().map { ($0.id, $0) })
+        XCTAssertEqual(byID["uuid:1234-ABCD"]?.lastMountPath, "/Volumes/Fixture SSD 1")
+        XCTAssertEqual(byID["uuid:9999-0000"]?.lastMountPath, "/Volumes/Archive")
+    }
+
+    func testUnregisterKeepsHistory() throws {
+        let store = try CreativeStore.inMemory()
+        try store.registerVolume(fixtureDrive(), role: "Footage")
+        try store.unregisterVolume(id: "uuid:1234-ABCD")
+        XCTAssertTrue(try store.registeredVolumes().isEmpty)
+        XCTAssertEqual(try store.volumes().count, 1)
+        XCTAssertEqual(try store.auditEvents().last?.kind, "volume.unregistered")
+    }
 }

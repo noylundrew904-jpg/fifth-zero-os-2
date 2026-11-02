@@ -43,9 +43,11 @@ app/Sources/CreativeOSCore/          Foundation-only logic (no file access)
     ActionPlanner.swift              dry-run planner (move / leave in place / skip; no delete)
 app/Sources/CreativeOSStore/         A2 local SQLite notebook (GRDB): volumes, assets, rules,
                                      operation journal, append-only audit log, quarantine manifest
+app/Sources/CreativeOSSystem/        A3 read-only drive reader (names, IDs, capacity only)
 app/Sources/CreativeOS/              SwiftUI dashboard (mock data)
 app/Tests/CreativeOSCoreTests/       Tests for mock data and every safety rule
 app/Tests/CreativeOSStoreTests/      Database tests (in-memory or disposable temp folder)
+app/Tests/CreativeOSSystemTests/     Drive reader tests (run on the test machine)
 tools/                               Read-only helper scripts
 docs/                                Zero-cost policy, roadmap
 ```

@@ -22,6 +22,12 @@ let package = Package(
             dependencies: ["CreativeOSCore", .product(name: "GRDB", package: "GRDB.swift")],
             path: "Sources/CreativeOSStore"
         ),
+        // macOS read-only system access: drive names, IDs and capacity. No file contents.
+        .target(
+            name: "CreativeOSSystem",
+            dependencies: ["CreativeOSCore"],
+            path: "Sources/CreativeOSSystem"
+        ),
         // SwiftUI dashboard (still mock data; not connected to the store yet).
         .executableTarget(
             name: "CreativeOS",
@@ -37,6 +43,11 @@ let package = Package(
             name: "CreativeOSStoreTests",
             dependencies: ["CreativeOSStore", "CreativeOSCore", .product(name: "GRDB", package: "GRDB.swift")],
             path: "Tests/CreativeOSStoreTests"
+        ),
+        .testTarget(
+            name: "CreativeOSSystemTests",
+            dependencies: ["CreativeOSSystem", "CreativeOSCore"],
+            path: "Tests/CreativeOSSystemTests"
         ),
     ]
 )

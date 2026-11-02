@@ -7,6 +7,9 @@ public enum StoreError: Error, Equatable {
     case notFound(String)
     case invalidTransition(from: OperationState, to: OperationState)
     case ruleNotLowRisk(String)
+    case volumeNotEligible(String)
+    /// The drive has no UUID; registering it needs the user's explicit confirmation.
+    case unstableVolumeID(String)
 }
 
 /// Creative OS's private notebook: index, rules, operation journal, audit log, quarantine manifest.
@@ -38,7 +41,8 @@ public final class CreativeStore {
         try dbQueue.write { db in
             var volume = try VolumeRecord.fetchOne(db, key: id)
                 ?? VolumeRecord(id: id, name: name, role: role, isRegistered: false,
-                                registeredAt: nil, lastSeenAt: nil)
+                                registeredAt: nil, lastSeenAt: nil, isStableID: true,
+                                lastMountPath: nil, totalBytes: nil)
             volume.name = name
             volume.role = role
             volume.isRegistered = true
@@ -47,6 +51,61 @@ public final class CreativeStore {
             try volume.save(db)
             try Self.audit(db, "volume.registered", "Registered drive “\(name)” as \(role).", at: now)
             return volume
+        }
+    }
+
+    /// Registers a connected drive the user picked. Drives without a UUID need `userConfirmedUnstableID`.
+    @discardableResult
+    public func registerVolume(_ info: VolumeInfo, role: String, userConfirmedUnstableID: Bool = false,
+                               at now: Date = Date()) throws -> VolumeRecord {
+        if case .notEligible(let reason) = VolumeRules.eligibility(info) {
+            throw StoreError.volumeNotEligible(reason)
+        }
+        let identity = VolumeIdentity.of(info)
+        if !identity.isStable && !userConfirmedUnstableID {
+            throw StoreError.unstableVolumeID(info.name)
+        }
+        try registerVolume(id: identity.id, name: info.name, role: role, at: now)
+        return try dbQueue.write { db in
+            guard var record = try VolumeRecord.fetchOne(db, key: identity.id) else {
+                throw StoreError.notFound(identity.id)
+            }
+            record.isStableID = identity.isStable
+            record.lastMountPath = info.mountPath
+            record.totalBytes = info.totalBytes
+            try record.update(db)
+            return record
+        }
+    }
+
+    public func unregisterVolume(id: String, at now: Date = Date()) throws {
+        try dbQueue.write { db in
+            guard var record = try VolumeRecord.fetchOne(db, key: id) else { throw StoreError.notFound(id) }
+            record.isRegistered = false
+            try record.update(db)
+            try Self.audit(db, "volume.unregistered", "Stopped using drive “\(record.name)”.", at: now)
+        }
+    }
+
+    /// Registered drives, in the form the pure `VolumeRegistry` uses.
+    public func registeredVolumes() throws -> [RegisteredVolume] {
+        try dbQueue.read { db in
+            try VolumeRecord.filter(Column("isRegistered") == true).order(Column("name")).fetchAll(db)
+                .map { RegisteredVolume(id: $0.id, name: $0.name, role: $0.role) }
+        }
+    }
+
+    /// Remembers when and where registered drives were last seen. Offline drives are left unchanged.
+    public func recordSeen(_ result: VolumeScanResult, at now: Date = Date()) throws {
+        try dbQueue.write { db in
+            for (id, status) in result.statuses {
+                guard case .online(let info) = status,
+                      var record = try VolumeRecord.fetchOne(db, key: id) else { continue }
+                record.lastSeenAt = now
+                record.lastMountPath = info.mountPath
+                record.totalBytes = info.totalBytes
+                try record.update(db)
+            }
         }
     }
 

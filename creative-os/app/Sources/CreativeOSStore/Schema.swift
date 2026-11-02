@@ -89,6 +89,14 @@ enum Schema {
                 """)
         }
 
+        migrator.registerMigration("v2-volume-details") { db in
+            try db.alter(table: "volume") { t in
+                t.add(column: "isStableID", .boolean).notNull().defaults(to: true)
+                t.add(column: "lastMountPath", .text)
+                t.add(column: "totalBytes", .integer)
+            }
+        }
+
         return migrator
     }
 }
