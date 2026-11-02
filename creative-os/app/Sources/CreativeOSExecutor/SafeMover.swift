@@ -61,8 +61,8 @@ public final class SafeMover {
             let fingerprint = self.fingerprint(destination)
             // The file has moved. If the journal can't be updated now, the entry stays "in progress"
             // and recoverInterrupted() records the truth on the next run.
-            try? store.complete(operationID: op.id, movedSize: fingerprint?.size,
-                                movedModifiedAt: fingerprint?.modified, at: now)
+            _ = try? store.complete(operationID: op.id, movedSize: fingerprint?.size,
+                                    movedModifiedAt: fingerprint?.modified, at: now)
             return .completed(destination: destination)
         } catch {
             return .refused("Journal error, nothing was changed: \(error)")
@@ -96,7 +96,7 @@ public final class SafeMover {
                 return try refuse(op, "Undo failed: \(error.localizedDescription) The file was not moved.", at: now)
             }
             // The file is back. Record it; a journal failure here must not hide that fact.
-            try? store.transition(operationID: op.id, to: .undone, at: now)
+            _ = try? store.transition(operationID: op.id, to: .undone, at: now)
             return .undone(restoredTo: op.sourcePath)
         } catch {
             return .refused("Journal error during undo: \(error)")

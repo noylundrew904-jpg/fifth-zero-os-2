@@ -56,6 +56,15 @@ final class VolumeRegistryTests: XCTestCase {
         XCTAssertEqual(VolumeRules.eligibility(ssd()), .eligible)
     }
 
+    func testTinySystemVolumesAndLookAlikesAreNotOffered() {
+        let cryptex = VolumeInfo(uuid: "c", name: "Cryptex", mountPath: "/Volumes/Cryptex",
+                                 totalBytes: 4_194_304, availableBytes: 3_137_536)
+        let twinA = ssd(name: "Twin", path: "/Volumes/Twin", uuid: "same")
+        let twinB = ssd(name: "Twin", path: "/Volumes/Twin 1", uuid: "same")
+        let result = VolumeRegistry.resolve(registered: [], mounted: [cryptex, twinA, twinB, ssd()])
+        XCTAssertEqual(result.unregisteredEligible, [ssd()])
+    }
+
     func testAbsolutePathOnlyWhenOnlineAndSafe() {
         let reg = RegisteredVolume(id: "uuid:AAAA-1111", name: "Footage SSD", role: "Footage")
         let online = VolumeRegistry.resolve(registered: [reg], mounted: [ssd()]).statuses

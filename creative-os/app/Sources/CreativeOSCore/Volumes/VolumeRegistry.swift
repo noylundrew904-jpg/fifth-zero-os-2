@@ -88,11 +88,15 @@ public struct VolumeScanResult: Equatable, Sendable {
 }
 
 public enum VolumeRules {
+    /// Smaller volumes are macOS helpers (e.g. 4 MB "Cryptex" system disks), not creative storage.
+    public static let minimumUsefulBytes: Int64 = 1_000_000_000
+
     public static func eligibility(_ v: VolumeInfo) -> VolumeEligibility {
         if !v.isLocal { return .notEligible("Network drives aren't supported; they can disconnect mid-copy.") }
         if !v.isBrowsable { return .notEligible("Hidden system volume.") }
         if v.isReadOnly { return .notEligible("Read-only volume (for example a disk image or installer).") }
         if v.totalBytes <= 0 { return .notEligible("macOS did not report its capacity.") }
+        if v.totalBytes < minimumUsefulBytes { return .notEligible("Too small to hold creative files (system helper volume).") }
         return .eligible
     }
 }
@@ -123,6 +127,7 @@ public enum VolumeRegistry {
         let registeredIDs = Set(registered.map(\.id))
         let candidates = mounted
             .filter { !registeredIDs.contains(VolumeIdentity.of($0).id) }
+            .filter { (byID[VolumeIdentity.of($0).id]?.count ?? 0) == 1 }   // never offer look-alike drives
             .filter { VolumeRules.eligibility($0) == .eligible }
             .sorted { $0.mountPath < $1.mountPath }
         return VolumeScanResult(statuses: statuses, unregisteredEligible: candidates, notes: notes)
