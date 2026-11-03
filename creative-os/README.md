@@ -46,11 +46,13 @@ app/Sources/CreativeOSStore/         A2 local SQLite notebook (GRDB): volumes, a
 app/Sources/CreativeOSSystem/        A3 read-only drive reader (names, IDs, capacity only)
 app/Sources/CreativeOSExecutor/      A4 the only code that moves files: approved, journaled,
                                      same-drive moves + undo + crash recovery. No delete code.
+app/Sources/CreativeOSFingerprint/   A5 read-only SHA-256 fingerprints, streamed in 1 MB pieces
 app/Sources/CreativeOS/              SwiftUI dashboard (mock data)
 app/Tests/CreativeOSCoreTests/       Tests for mock data and every safety rule
 app/Tests/CreativeOSStoreTests/      Database tests (in-memory or disposable temp folder)
 app/Tests/CreativeOSSystemTests/     Drive reader tests (run on the test machine)
 app/Tests/CreativeOSExecutorTests/   Mover tests (throwaway temp folders only)
+app/Tests/CreativeOSFingerprintTests/ Fingerprint tests (throwaway temp folders only)
 tools/                               Read-only helper scripts
 docs/                                Zero-cost policy, roadmap
 ```

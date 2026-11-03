@@ -10,6 +10,8 @@ public enum StoreError: Error, Equatable {
     case volumeNotEligible(String)
     /// The drive has no UUID; registering it needs the user's explicit confirmation.
     case unstableVolumeID(String)
+    /// The file's size no longer matches what the scan recorded, so the fingerprint is not stored.
+    case sizeMismatch(expected: Int64, actual: Int64)
 }
 
 /// Creative OS's private notebook: index, rules, operation journal, audit log, quarantine manifest.
@@ -133,6 +135,44 @@ public final class CreativeStore {
                                     sizeBytes: sizeBytes, sha256: nil, firstSeenAt: now, lastSeenAt: now)
             try asset.insert(db)
             return asset
+        }
+    }
+
+    /// Saves a verified SHA-256 fingerprint for an asset. Refused if the size changed since the scan.
+    @discardableResult
+    public func recordFingerprint(assetID: String, _ fingerprint: FileFingerprint,
+                                  at now: Date = Date()) throws -> AssetRecord {
+        try dbQueue.write { db in
+            guard var asset = try AssetRecord.fetchOne(db, key: assetID) else { throw StoreError.notFound(assetID) }
+            guard asset.sizeBytes == fingerprint.sizeBytes else {
+                throw StoreError.sizeMismatch(expected: asset.sizeBytes, actual: fingerprint.sizeBytes)
+            }
+            asset.sha256 = fingerprint.sha256?.lowercased()
+            asset.lastSeenAt = now
+            try asset.update(db)
+            return asset
+        }
+    }
+
+    /// Groups of assets that are proven byte-for-byte identical (same size and same full SHA-256).
+    /// Assets without a fingerprint are never grouped.
+    public func identicalAssetGroups() throws -> [[AssetRecord]] {
+        try dbQueue.read { db in
+            let hashed = try AssetRecord.filter(Column("sha256") != nil).fetchAll(db)
+            var groups: [String: [AssetRecord]] = [:]
+            for a in hashed {
+                guard let h = a.sha256 else { continue }
+                groups["\(a.sizeBytes):\(h)", default: []].append(a)
+            }
+            return groups.values
+                .filter { $0.count > 1 }
+                .map { group in group.sorted { $0.path < $1.path } }
+                .filter { g in
+                    // Double-check with the core rule (size + valid 64-char hash).
+                    let f = g.map { FileFingerprint(sizeBytes: $0.sizeBytes, sha256: $0.sha256) }
+                    return f.dropFirst().allSatisfy { DuplicateRules.areByteIdentical(f[0], $0) }
+                }
+                .sorted { $0[0].path < $1[0].path }
         }
     }
 

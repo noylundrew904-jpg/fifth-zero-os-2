@@ -35,6 +35,12 @@ let package = Package(
             dependencies: ["CreativeOSCore", "CreativeOSStore"],
             path: "Sources/CreativeOSExecutor"
         ),
+        // Read-only SHA-256 fingerprints of file contents, streamed in 1 MB pieces (Apple CryptoKit).
+        .target(
+            name: "CreativeOSFingerprint",
+            dependencies: ["CreativeOSCore"],
+            path: "Sources/CreativeOSFingerprint"
+        ),
         // SwiftUI dashboard (still mock data; not connected to the store yet).
         .executableTarget(
             name: "CreativeOS",
@@ -60,6 +66,11 @@ let package = Package(
             name: "CreativeOSExecutorTests",
             dependencies: ["CreativeOSExecutor", "CreativeOSStore", "CreativeOSCore"],
             path: "Tests/CreativeOSExecutorTests"
+        ),
+        .testTarget(
+            name: "CreativeOSFingerprintTests",
+            dependencies: ["CreativeOSFingerprint", "CreativeOSCore"],
+            path: "Tests/CreativeOSFingerprintTests"
         ),
     ]
 )

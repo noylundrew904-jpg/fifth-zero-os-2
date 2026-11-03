@@ -44,8 +44,8 @@ Every change is built and tested automatically on a free GitHub-hosted Mac
   - [x] **A2: Local database and journal**: GRDB.swift (MIT) migrations for volumes, assets (stable IDs), rules, operation journal, append-only audit log, quarantine manifest
   - [x] **A3: Registered volumes**: read volume UUID/capacity (read-only), register, offline detection
   - [x] **A4: File-operation state machine**: same-volume move + journal + undo, tested **only in disposable temp fixture folders**
-  - [ ] **A5: Streaming SHA-256 hasher** (next) + interrupted-copy tests (fixtures)
-- **B. Organize Now:** scoped read-only scan of approved folders → index → suggestions → virtual Review Inbox → preview → approved execution
+  - [x] **A5: Streaming SHA-256 hasher** + interrupted-copy tests (fixtures)
+- **B. Organize Now** (next): scoped read-only scan of approved folders → index → suggestions → virtual Review Inbox → preview → approved execution
 - **C. Creative workflows:** shared footage, library references, export grouping, version retention, final confirmation, status suggestions in the UI
 - **D. Packaging:** manifest + dependency report, complete/partial, dual destination, copy → verify → commit, resume on next Organize Now, incremental versions, Smart Reopen & Restore
 - **E. Storage and duplicates:** per-drive recommendations, protected duplicate classification, quarantine/restore UI, 30-day review

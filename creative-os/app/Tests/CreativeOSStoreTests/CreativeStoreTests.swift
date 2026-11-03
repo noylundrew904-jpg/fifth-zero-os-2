@@ -243,4 +243,35 @@ final class CreativeStoreTests: XCTestCase {
         XCTAssertEqual(try store.volumes().count, 1)
         XCTAssertEqual(try store.auditEvents().last?.kind, "volume.unregistered")
     }
+
+    // MARK: Fingerprints (A5)
+
+    func testFingerprintIsStoredOnlyWhenSizeMatches() throws {
+        let store = try CreativeStore.inMemory()
+        try store.registerVolume(id: "V", name: "Mac", role: "Active")
+        let asset = try store.upsertAsset(volumeID: "V", path: "/Fixture/a.wav", sizeBytes: 10)
+        let hash = String(repeating: "c", count: 64)
+        XCTAssertThrowsError(try store.recordFingerprint(assetID: asset.id, FileFingerprint(sizeBytes: 11, sha256: hash))) { error in
+            XCTAssertEqual(error as? StoreError, .sizeMismatch(expected: 10, actual: 11))
+        }
+        let saved = try store.recordFingerprint(assetID: asset.id, FileFingerprint(sizeBytes: 10, sha256: hash.uppercased()))
+        XCTAssertEqual(saved.sha256, hash)
+    }
+
+    func testIdenticalGroupsNeedSameSizeAndHash() throws {
+        let store = try CreativeStore.inMemory()
+        try store.registerVolume(id: "V", name: "Mac", role: "Active")
+        let h1 = String(repeating: "a", count: 64)
+        let h2 = String(repeating: "b", count: 64)
+        func add(_ path: String, _ size: Int64, _ hash: String?) throws {
+            let a = try store.upsertAsset(volumeID: "V", path: path, sizeBytes: size)
+            if let hash { try store.recordFingerprint(assetID: a.id, FileFingerprint(sizeBytes: size, sha256: hash)) }
+        }
+        try add("/Fixture/beat.wav", 10, h1)
+        try add("/Fixture/beat copy.wav", 10, h1)
+        try add("/Fixture/other/beat.wav", 10, h2)      // same name, different content
+        try add("/Fixture/unhashed.wav", 10, nil)       // never grouped without a fingerprint
+        let groups = try store.identicalAssetGroups()
+        XCTAssertEqual(groups.map { $0.map(\.path) }, [["/Fixture/beat copy.wav", "/Fixture/beat.wav"]])
+    }
 }
