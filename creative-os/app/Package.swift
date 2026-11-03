@@ -41,6 +41,12 @@ let package = Package(
             dependencies: ["CreativeOSCore"],
             path: "Sources/CreativeOSFingerprint"
         ),
+        // Read-only folder scanner: names, sizes and dates inside approved folders. Never opens files.
+        .target(
+            name: "CreativeOSScanner",
+            dependencies: ["CreativeOSCore"],
+            path: "Sources/CreativeOSScanner"
+        ),
         // SwiftUI dashboard (still mock data; not connected to the store yet).
         .executableTarget(
             name: "CreativeOS",
@@ -71,6 +77,11 @@ let package = Package(
             name: "CreativeOSFingerprintTests",
             dependencies: ["CreativeOSFingerprint", "CreativeOSCore"],
             path: "Tests/CreativeOSFingerprintTests"
+        ),
+        .testTarget(
+            name: "CreativeOSScannerTests",
+            dependencies: ["CreativeOSScanner", "CreativeOSCore"],
+            path: "Tests/CreativeOSScannerTests"
         ),
     ]
 )
