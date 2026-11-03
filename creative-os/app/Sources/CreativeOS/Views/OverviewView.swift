@@ -16,7 +16,7 @@ struct OverviewView: View {
 
                 HStack(alignment: .center, spacing: 16) {
                     Button {
-                        showOrganize = true
+                        selection = .organize
                     } label: {
                         Label("Organize Now", systemImage: "sparkles")
                             .font(.title3.weight(.semibold))
@@ -28,9 +28,9 @@ struct OverviewView: View {
                     .keyboardShortcut("o", modifiers: [.command, .shift])
 
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("Simulation only in this build.").fontWeight(.medium)
-                        Text("Shows a fictional dry-run plan. Nothing is scanned or changed.")
-                            .font(.caption).foregroundStyle(.secondary)
+                        Text("Opens the live, read-only preview.").fontWeight(.medium)
+                        Button("Or see a fictional sample plan") { showOrganize = true }
+                            .buttonStyle(.link).font(.caption)
                     }
                 }
 

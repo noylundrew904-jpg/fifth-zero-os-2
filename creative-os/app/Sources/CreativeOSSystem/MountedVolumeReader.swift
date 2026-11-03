@@ -52,3 +52,16 @@ public enum MountedVolumeReader {
     }
 }
 #endif
+
+#if os(macOS)
+extension MountedVolumeReader {
+    /// The Creative OS drive ID ("uuid:…") of the drive holding `path`, or nil if macOS doesn't report one.
+    /// Reads drive metadata only.
+    public static func volumeID(forPath path: String) -> String? {
+        let url = URL(fileURLWithPath: path)
+        guard let uuid = try? url.resourceValues(forKeys: [.volumeUUIDStringKey]).volumeUUIDString,
+              !uuid.isEmpty else { return nil }
+        return "uuid:" + uuid.uppercased()
+    }
+}
+#endif

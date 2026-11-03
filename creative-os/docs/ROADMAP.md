@@ -47,8 +47,8 @@ Every change is built and tested automatically on a free GitHub-hosted Mac
   - [x] **A5: Streaming SHA-256 hasher** + interrupted-copy tests (fixtures)
 - **B. Organize Now**
   - [x] **B1: Scan + suggestions + dry-run preview** (read-only; practice folders only)
-  - [ ] **B2: Connect to the app** (next): pick folders, register drive, show the real preview, Review Inbox
-  - [ ] B3: Approve and run moves from the app, with Undo
+  - [x] **B2: Live read-only preview in the app**: pick a folder and Creative_Master, type clients/campaigns, see the plan (not saved yet)
+  - [ ] **B3: Save settings + approve and run moves from the app, with Undo** (next)
 - **C. Creative workflows:** shared footage, library references, export grouping, version retention, final confirmation, status suggestions in the UI
 - **D. Packaging:** manifest + dependency report, complete/partial, dual destination, copy → verify → commit, resume on next Organize Now, incremental versions, Smart Reopen & Restore
 - **E. Storage and duplicates:** per-drive recommendations, protected duplicate classification, quarantine/restore UI, 30-day review

@@ -47,10 +47,11 @@ let package = Package(
             dependencies: ["CreativeOSCore"],
             path: "Sources/CreativeOSScanner"
         ),
-        // SwiftUI dashboard (still mock data; not connected to the store yet).
+        // SwiftUI dashboard: live read-only Organize Now preview + mock sample screens.
         .executableTarget(
             name: "CreativeOS",
-            dependencies: ["CreativeOSCore"],
+            // Read-only layers only. The app cannot move files yet (no executor, no store).
+            dependencies: ["CreativeOSCore", "CreativeOSScanner", "CreativeOSSystem"],
             path: "Sources/CreativeOS"
         ),
         .testTarget(

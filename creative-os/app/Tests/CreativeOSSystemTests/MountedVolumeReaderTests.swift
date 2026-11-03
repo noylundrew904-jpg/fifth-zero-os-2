@@ -28,3 +28,13 @@ final class MountedVolumeReaderTests: XCTestCase {
     }
 }
 #endif
+
+#if os(macOS)
+final class VolumeLookupTests: XCTestCase {
+    func testTempFolderIsOnARecognisedDrive() {
+        let id = MountedVolumeReader.volumeID(forPath: FileManager.default.temporaryDirectory.path)
+        XCTAssertNotNil(id)
+        XCTAssertTrue(id?.hasPrefix("uuid:") ?? false)
+    }
+}
+#endif

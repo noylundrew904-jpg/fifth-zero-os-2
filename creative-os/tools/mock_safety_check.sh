@@ -7,7 +7,8 @@
 #  3. anything other than CreativeOSSystem / CreativeOSExecutor uses the file system at all;
 #  4. anything reads file contents except CreativeOSFingerprint (read-only, streamed),
 #     or anything lists folders except CreativeOSScanner (names, sizes and dates only);
-#  5. the dashboard app is connected to the real layers before scanning is approved.
+#  5. the dashboard app can reach anything beyond the read-only scanner and drive reader
+#     (no executor, store or fingerprint reader yet), or anything but the app shows a folder picker.
 set -u
 cd "$(dirname "$0")/../app/Sources" || exit 2
 found=0
@@ -36,7 +37,10 @@ check "moves outside CreativeOSExecutor" "$(all_except CreativeOSExecutor)" 'mov
 
 # 3. File-system access: system reader, executor and fingerprint reader only.
 check "file-system access outside allowed layers" "$(all_except 'CreativeOSSystem|CreativeOSExecutor|CreativeOSFingerprint|CreativeOSScanner')" \
-  'FileManager' 'attributesOfItem' 'NSOpenPanel' 'fileImporter'
+  'FileManager' 'attributesOfItem'
+
+# 3b. Only the app may show the folder picker (that is how the user grants access).
+check "folder picker outside the app" "$(all_except CreativeOS)" 'NSOpenPanel' 'fileImporter'
 
 # 4a. Only the fingerprint reader may open files, and only for reading.
 check "opens files outside CreativeOSFingerprint" "$(all_except CreativeOSFingerprint)" 'FileHandle' 'read(upToCount'
@@ -47,12 +51,12 @@ check "lists folders outside CreativeOSScanner" "$(all_except CreativeOSScanner)
 # 4c. Nobody loads whole files into memory.
 check "loads whole files" "." 'Data(contentsOf' 'contentsOf:' 'contents(atPath'
 
-# 5. The dashboard stays on mock data for now.
-check "app connected too early" "CreativeOS" \
-  'import CreativeOSStore' 'import CreativeOSSystem' 'import CreativeOSExecutor' 'import CreativeOSFingerprint' 'import CreativeOSScanner'
+# 5. The app may only use the read-only scanner and drive reader for now.
+check "app connected to write-capable layers too early" "CreativeOS" \
+  'import CreativeOSStore' 'import CreativeOSExecutor' 'import CreativeOSFingerprint' 'SafeMover' 'GRDB'
 
 if [[ $found -ne 0 ]]; then
   echo "SAFETY CHECK FAILED" >&2
   exit 1
 fi
-echo "PASS: nothing can delete files; only the executor can move them; only the fingerprint reader reads contents; only the scanner lists folders; the app still uses mock data."
+echo "PASS: nothing can delete files; only the executor can move them; only the fingerprint reader reads contents; only the scanner lists folders; the app can only read (preview), never move."

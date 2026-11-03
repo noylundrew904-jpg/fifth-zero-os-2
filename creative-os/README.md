@@ -4,10 +4,11 @@ Local-first, one-click creative file organizer for macOS.
 Free and offline: see [docs/ZERO_COST.md](docs/ZERO_COST.md).
 Status, gap analysis and next steps: see [docs/ROADMAP.md](docs/ROADMAP.md).
 
-**Current state:** mock dashboard, tested safety rules engine, and a tested local
-database (journal + audit log) that is not connected to the app yet.
-Nothing reads, moves, renames, deletes or uploads real files yet.
-Every change is built and tested automatically on a free GitHub-hosted Mac.
+**Current state:** the app has a live, read-only **Organize Now** preview: you pick a
+folder and it shows what it *would* organize, what stays put for review, and why.
+It reads only file names, sizes and dates, and changes nothing. All other pages are
+clearly labelled sample screens with fictional data. Moving files from the app is not
+switched on yet. Every change is built and tested automatically on a free GitHub-hosted Mac.
 
 ## Run it (on your Mac)
 
@@ -49,7 +50,7 @@ app/Sources/CreativeOSExecutor/      A4 the only code that moves files: approved
                                      same-drive moves + undo + crash recovery. No delete code.
 app/Sources/CreativeOSFingerprint/   A5 read-only SHA-256 fingerprints, streamed in 1 MB pieces
 app/Sources/CreativeOSScanner/       B1 read-only folder scanner (names, sizes, dates; never opens files)
-app/Sources/CreativeOS/              SwiftUI dashboard (mock data)
+app/Sources/CreativeOS/              SwiftUI app: Live/ = read-only Organize Now preview; Views/ = sample screens
 app/Tests/CreativeOSCoreTests/       Tests for mock data and every safety rule
 app/Tests/CreativeOSStoreTests/      Database tests (in-memory or disposable temp folder)
 app/Tests/CreativeOSSystemTests/     Drive reader tests (run on the test machine)

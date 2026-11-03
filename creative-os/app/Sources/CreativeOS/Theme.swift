@@ -49,13 +49,30 @@ struct MockBanner: View {
         HStack(spacing: 8) {
             Image(systemName: "theatermasks.fill")
             Text("MOCK DATA").fontWeight(.bold)
-            Text("Everything shown is fictional. No files on this Mac are read or changed.")
+            Text("Sample screen. Everything here is fictional.")
         }
         .font(.callout)
         .foregroundStyle(Theme.mock)
         .padding(.vertical, 7)
         .frame(maxWidth: .infinity)
         .background(Theme.mock.opacity(0.14))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// Shown on the live Organize Now page.
+struct LiveBanner: View {
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "eye.fill")
+            Text("LIVE PREVIEW").fontWeight(.bold)
+            Text("Reads only the folder you choose. Nothing is moved, renamed or deleted.")
+        }
+        .font(.callout)
+        .foregroundStyle(.green)
+        .padding(.vertical, 7)
+        .frame(maxWidth: .infinity)
+        .background(Color.green.opacity(0.12))
         .accessibilityElement(children: .combine)
     }
 }
