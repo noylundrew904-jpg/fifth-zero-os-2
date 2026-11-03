@@ -31,3 +31,12 @@ jobs:
         run: swift build
       - name: Run tests
         run: swift test
+      - name: Package downloadable app (ad-hoc signed, free)
+        run: bash ../tools/make_app.sh
+      - name: Upload app for download
+        uses: actions/upload-artifact@v4
+        with:
+          name: CreativeOS-preview
+          path: creative-os/app/dist/CreativeOS-preview.zip
+          retention-days: 30
+          if-no-files-found: error
